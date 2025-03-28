@@ -1,7 +1,6 @@
 <template>
   <v-app>
     <the-header />
-    <span> testiu483278574 </span>
     <v-main>
       <v-container fluid fill-height>
         <v-layout justify-center>

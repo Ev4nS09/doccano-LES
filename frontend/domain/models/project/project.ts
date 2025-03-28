@@ -82,7 +82,7 @@ export class Project {
       throw new Error('Project name must be less than 100 characters')
     }
     if (!validateMinLength(_description)) {
-      throw new Error('Project description is required')
+      _description = "No description added"
     }
     if (!allProjectTypes.includes(_projectType as ProjectType)) {
       throw new Error(`Invalid project type: ${_projectType}`)
