@@ -31,7 +31,6 @@
     </v-btn>
     <v-btn
       v-if="isAuthenticated"
-      v-if="isStaff"
       text
       class="text-capitalize"
       @click="$router.push(localePath('/users'))"
@@ -123,7 +122,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters('auth', ['isAuthenticated', 'getUsername', 'isStaff']),
+    ...mapGetters('auth', ['isAuthenticated', 'getUsername']),
     ...mapGetters('projects', ['currentProject']),
     ...mapGetters('config', ['isRTL']),
 

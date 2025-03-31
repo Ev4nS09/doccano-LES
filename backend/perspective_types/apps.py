@@ -1,6 +1,5 @@
 from django.apps import AppConfig
 
-
-class PerspectivesConfig(AppConfig):
+class PerspectiveTypesConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "perspectives"
+    name = "perspective_types"

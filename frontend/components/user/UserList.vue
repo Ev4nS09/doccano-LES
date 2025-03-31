@@ -39,7 +39,6 @@ import { dateParse } from '@vuejs-community/vue-filter-date-parse'
 import type { PropType } from 'vue'
 import Vue from 'vue'
 import { DataOptions } from 'vuetify/types'
-import { Project } from '~/domain/models/project/project'
 import { UserItem } from '~/domain/models/user/user'
 
 export default Vue.extend({

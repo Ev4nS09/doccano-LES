@@ -32,11 +32,8 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import UserList from '@/components/user/UserList.vue'
 import FormDelete from '~/components/user/FormDelete.vue'
-import { Page } from '~/domain/models/page'
-import { Project } from '~/domain/models/project/project'
 import { UserItem } from '~/domain/models/user/user'
 import { APIUserRepository } from '~/repositories/user/apiUserRepository'
-import { SearchQueryData } from '~/services/application/project/projectApplicationService'
 
 
 export default Vue.extend({
@@ -61,8 +58,8 @@ export default Vue.extend({
 
   async fetch() {
             console.error("COnsole log works")
-    let query = ''
-    let UserAPI = new APIUserRepository(); 
+    const query = ''
+    const UserAPI = new APIUserRepository(); 
     this.isLoading = true
     this.users = await UserAPI.list(
             query
@@ -91,7 +88,7 @@ export default Vue.extend({
   methods: {
     async remove() {
 
-        let UserAPI = new APIUserRepository(); 
+        const UserAPI = new APIUserRepository(); 
         try
         {
             for(let i = 0; i < this.selected.length; i++)

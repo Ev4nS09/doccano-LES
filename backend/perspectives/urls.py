@@ -1,11 +1,49 @@
-from django.urls import include, path
+from django.urls import path
+from .views import (
+    CategoryPerspectiveListAPI,
+    CategoryPerspectiveDetailAPI,
+    SpanPerspectiveListAPI,
+    SpanPerspectiveDetailAPI,
+    RelationPerspectiveListAPI,
+    RelationPerspectiveDetailAPI,
+)
 
-from .views import Me, UserCreation, Users, UserDeletion
+app_name = "perspectives"
 
 urlpatterns = [
-    path(route="me", view=Me.as_view(), name="me"),
-    path(route="users", view=Users.as_view(), name="user_list"),
-    path(route="users/create", view=UserCreation.as_view(), name="user_create"),
-    path("users/<int:pk>", UserDeletion.as_view(), name="user_delete"),
-    path("auth/", include("dj_rest_auth.urls")),
+    # Category Perspectives
+    path(
+        "examples/<int:example_id>/p-categories",
+        CategoryPerspectiveListAPI.as_view(),
+        name="category_perspective_list"
+    ),
+    path(
+        "examples/<int:example_id>/p-categories/<int:annotation_id>",
+        CategoryPerspectiveDetailAPI.as_view(),
+        name="category_perspective_detail"
+    ),
+
+    # Span Perspectives
+    path(
+        "examples/<int:example_id>/p-spans",
+        SpanPerspectiveListAPI.as_view(),
+        name="span_perspective_list"
+    ),
+    path(
+        "examples/<int:example_id>/p-spans/<int:annotation_id>",
+        SpanPerspectiveDetailAPI.as_view(),
+        name="span_perspective_detail"
+    ),
+
+    # Relation Perspectives
+    path(
+        "examples/<int:example_id>/p-relations",
+        RelationPerspectiveListAPI.as_view(),
+        name="relation_perspective_list"
+    ),
+    path(
+        "examples/<int:example_id>/p-relations/<int:annotation_id>",
+        RelationPerspectiveDetailAPI.as_view(),
+        name="relation_perspective_detail"
+    ),
 ]
