@@ -22,9 +22,8 @@ export const allProjectTypes = <const>[
   Speech2text
 ]
 export type ProjectType = (typeof allProjectTypes)[number]
-const MIN_LENGTH = 1
 const MAX_PROJECT_NAME_LENGTH = 100
-
+const MIN_LENGTH = 1
 export const validateMinLength = (text: string): boolean => {
   return text.trim().length >= MIN_LENGTH
 }
@@ -82,7 +81,7 @@ export class Project {
       throw new Error('Project name must be less than 100 characters')
     }
     if (!validateMinLength(_description)) {
-      _description = "No description added"
+      throw new Error('There must be a description')
     }
     if (!allProjectTypes.includes(_projectType as ProjectType)) {
       throw new Error(`Invalid project type: ${_projectType}`)

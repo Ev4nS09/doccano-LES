@@ -33,7 +33,9 @@ import { mapGetters } from 'vuex'
 import UserList from '@/components/user/UserList.vue'
 import FormDelete from '~/components/user/FormDelete.vue'
 import { UserItem } from '~/domain/models/user/user'
+import { PerspectiveType } from '~/domain/models/perspecdtive_types/perspective_types'
 import { APIUserRepository } from '~/repositories/user/apiUserRepository'
+import { APIPerspectiveTypesRepository } from '~/repositories/perspective_types/apiPerspectiveTypesRepository'
 
 
 export default Vue.extend({
@@ -51,20 +53,34 @@ export default Vue.extend({
     return {
       dialogDelete: false,
       users: [] as UserItem [],
+      perspectiveTypes: [] as PerspectiveType [],
       selected: [] as UserItem[],
       isLoading: false
     }
   },
 
   async fetch() {
-            console.error("COnsole log works")
+     
     const query = ''
     const UserAPI = new APIUserRepository(); 
+    const PerspectiveAPI = new APIPerspectiveTypesRepository(); 
     this.isLoading = true
     this.users = await UserAPI.list(
             query
     )
+    for(let i = 0; i < 1 ; i++)
+    {
+        try{
+            this.perspectiveTypes = await PerspectiveAPI.list(i)
+            console.error("IT WORKS ON ID" + i)
+            break
+        }
+        catch{
+        }
+    }
     this.isLoading = false
+
+
   },
 
   computed: {
