@@ -26,8 +26,8 @@ class CategoryPerspectiveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CategoryPerspective
-        fields = ['id', 'example', 'perspective', 'item', 'user']
-
+        fields = ['id', 'example', 'user', 'perspective', 'item']
+        read_only_fields = ("user",)
 
 class SpanPerspectiveSerializer(serializers.ModelSerializer):
     """Serializador para as anotações de perspectiva do tipo Span."""

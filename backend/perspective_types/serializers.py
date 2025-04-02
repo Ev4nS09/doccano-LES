@@ -32,3 +32,11 @@ class RelationTypeSerializer(PerspectiveSerializer):
     class Meta(PerspectiveSerializer.Meta):
         model = RelationType
         fields = PerspectiveSerializer.Meta.fields
+
+class PerspectiveTypeSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    description = serializers.CharField(required=False)
+    created_at = serializers.DateTimeField()
+    updated_at = serializers.DateTimeField()
+    project_id = serializers.IntegerField()

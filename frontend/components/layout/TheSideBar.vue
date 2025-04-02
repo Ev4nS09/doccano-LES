@@ -37,7 +37,8 @@ import {
   mdiDatabase,
   mdiHome,
   mdiLabel,
-  mdiPlayCircleOutline
+  mdiPlayCircleOutline,
+  mdiEye 
 } from '@mdi/js'
 import { getLinkToAnnotationPage } from '~/presenter/linkToAnnotationPage'
 
@@ -81,6 +82,14 @@ export default {
           icon: mdiLabel,
           text: this.$t('labels.labels'),
           link: 'labels',
+          isVisible:
+            (this.isProjectAdmin || this.project.allowMemberToCreateLabelType) &&
+            this.project.canDefineLabel
+        },
+        {
+          icon: mdiEye,
+          text: 'Perspectives',
+          link: 'perspectives',
           isVisible:
             (this.isProjectAdmin || this.project.allowMemberToCreateLabelType) &&
             this.project.canDefineLabel
