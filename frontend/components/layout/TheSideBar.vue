@@ -118,7 +118,7 @@ export default {
           icon: mdiBookOpenOutline,
           text: this.$t('guideline.guideline'),
           link: 'guideline',
-          isVisible: this.isProjectAdmin
+          isVisible: true 
         },
         {
           icon: mdiChartBar,

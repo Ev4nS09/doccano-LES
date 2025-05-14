@@ -1,0 +1,15 @@
+Tema 4:
+    Consultar/Listar discussoes/criterios; 
+    Criar/Postar "criterios";
+    Votar no "criterio";
+    Criar historico de discussoes e decisoes;
+    Consultar/Listar historico;
+
+Tema 5:
+    Gerar relatorios de desacordo e perspetivas;
+    Criar Sumario estatistico;
+    Analise das ifluencias de perspetivas e anotacoes;
+    Exportar relatorios em formatos comiuns;
+
+    
+

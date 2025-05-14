@@ -3,15 +3,12 @@
     :value="value"
     :headers="headers"
     :items="items"
-    :options.sync="options"
-    :server-items-length="total"
     :search="search"
     :loading="isLoading"
     :loading-text="$t('generic.loading')"
     :no-data-text="$t('vuetify.noDataAvailable')"
     :footer-props="{
       showFirstLastPage: true,
-      'items-per-page-options': [10, 50, 100],
       'items-per-page-text': $t('vuetify.itemsPerPageText'),
       'page-text': $t('dataset.pageText')
     }"
@@ -19,16 +16,16 @@
     show-select
     @input="$emit('input', $event)"
   >
-    <template #top>
-      <v-text-field
-        v-model="search"
-        :prepend-inner-icon="mdiMagnify"
-        :label="$t('generic.search')"
-        single-line
-        hide-details
-        filled
-      />
-    </template>
+	  <template #top>
+		<v-text-field
+		  v-model="search"
+		  :prepend-inner-icon="mdiMagnify"
+		  :label="$t('generic.search')"
+		  single-line
+		  hide-details
+		  filled
+		/>
+	  </template>
   </v-data-table>
 </template>
 
@@ -39,7 +36,7 @@ import { dateParse } from '@vuejs-community/vue-filter-date-parse'
 import type { PropType } from 'vue'
 import Vue from 'vue'
 import { DataOptions } from 'vuetify/types'
-import { Perspective } from '~/domain/models/perspective/perspective'
+import { PerspectiveItem } from '~/domain/models/perspective/perspective'
 
 export default Vue.extend({
   props: {
@@ -49,12 +46,12 @@ export default Vue.extend({
       required: true
     },
     items: {
-      type: Array as PropType<Perspective[]>,
+      type: Array as PropType<PerspectiveItem[]>,
       default: () => [],
       required: true
     },
     value: {
-      type: Array as PropType<Perspective[]>,
+      type: Array as PropType<PerspectiveItem[]>,
       default: () => [],
       required: true
     },
@@ -67,7 +64,7 @@ export default Vue.extend({
 
   data() {
     return {
-      search: this.$route.query.q,
+      search: '',
       options: {} as DataOptions,
       mdiMagnify,
       dateFormat,
@@ -79,9 +76,9 @@ export default Vue.extend({
     headers(): { text: any; value: string; sortable?: boolean }[] {
       return [
         { text: 'Name', value: 'name' },
-        // { text: 'Description', value: 'description' },
-        // { text: 'Created At', value: 'created_at' },
-        // { text: 'Updated At', value: 'updated_at' },
+        { text: 'Type', value: 'p_type'},
+        { text: 'Created At', value: 'created_at' },
+        { text: 'Updated At', value: 'updated_at' },
       ]
     }
   },
@@ -93,22 +90,12 @@ export default Vue.extend({
           query: {
             limit: this.options.itemsPerPage.toString(),
             offset: ((this.options.page - 1) * this.options.itemsPerPage).toString(),
-            q: this.search
+q: this.search
           }
         })
       },
       deep: true
     },
-    search() {
-      this.updateQuery({
-        query: {
-          limit: this.options.itemsPerPage.toString(),
-          offset: '0',
-          q: this.search
-        }
-      })
-      this.options.page = 1
-    }
   },
 
   methods: {

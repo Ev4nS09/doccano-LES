@@ -24,7 +24,8 @@ import { APICatalogRepository } from '@/repositories/upload/apiCatalogRepository
 import { APIParseRepository } from '@/repositories/upload/apiParseRepository'
 import { APIUserRepository } from '@/repositories/user/apiUserRepository'
 import { APISegmentationRepository } from '~/repositories/tasks/apiSegmentationRepository'
-import { ApiPerspectiveRepository } from '~/repositories/perspective/apiPerspectiveRepository'
+import { APIRuleRepository } from '~/repositories/rule/apiRuleRepository'
+import { APIPerspectiveRepository } from '~/repositories/perspective/apiPerspectiveRepository'
 
 export interface Repositories {
   // User
@@ -71,7 +72,10 @@ export interface Repositories {
   segmentation: APISegmentationRepository
 
   // Perspective
-  perspective: ApiPerspectiveRepository
+  perspective: APIPerspectiveRepository
+    
+  // Rule
+  rule: APIRuleRepository
 }
 
 declare module 'vue/types/vue' {
@@ -125,7 +129,10 @@ const repositories: Repositories = {
   segmentation: new APISegmentationRepository(),
 
   // Perspective
-  perspective: new ApiPerspectiveRepository()
+  perspective: new APIPerspectiveRepository(),
+
+  // Rule
+  rule: new APIRuleRepository(),
 }
 
 const plugin: Plugin = (_, inject) => {

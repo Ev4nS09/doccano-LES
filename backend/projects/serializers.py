@@ -14,6 +14,10 @@ from .models import (
     Speech2textProject,
     Tag,
     TextClassificationProject,
+    AnnotationRule,
+    RuleComment,
+    Perspective,
+    UserPerspective,
 )
 
 
@@ -146,3 +150,57 @@ class ProjectPolymorphicSerializer(PolymorphicSerializer):
         Project: ProjectSerializer,
         **{cls.Meta.model: cls for cls in ProjectSerializer.__subclasses__()},
     }
+
+class PerspectiveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Perspective
+        fields = ['id', 'name', 'project', 'selection_list', 'p_type', 'created_at', 'updated_at']
+
+class UserPerspectiveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPerspective
+        fields = ['id', 'perspective', 'user', 'value', 'created_at', 'updated_at']
+
+class RuleCommentSerializer(serializers.ModelSerializer):
+    author_username = serializers.SerializerMethodField()
+
+    def get_author_username(self, obj):
+        return obj.author.username
+
+    class Meta:
+        model = RuleComment
+        fields = ['id', 'author', 'author_username', 'content', 'created_at', 'updated_at']
+        read_only_fields = ['author', 'created_at', 'updated_at']
+
+class AnnotationRuleSerializer(serializers.ModelSerializer):
+    comments = serializers.SerializerMethodField()
+    author_username = serializers.SerializerMethodField()
+    score = serializers.SerializerMethodField()
+    user_vote = serializers.SerializerMethodField()
+
+    def get_comments(self, obj):
+        # Only include comments if specifically requested
+        if self.context.get('include_comments', False):
+            return RuleCommentSerializer(obj.comments.all(), many=True).data
+        return []
+
+    def get_author_username(self, obj):
+        return obj.created_by.username if obj.created_by else None
+
+    def get_score(self, obj):
+        return obj.score
+
+    def get_user_vote(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            if obj.upvotes.filter(id=request.user.id).exists():
+                return 1
+            elif obj.downvotes.filter(id=request.user.id).exists():
+                return -1
+        return 0
+
+    class Meta:
+        model = AnnotationRule
+        fields = ['id', 'project', 'title', 'description', 'created_by', 'author_username', 
+                 'created_at', 'updated_at', 'score', 'user_vote', 'comments', 'upvotes', 'downvotes', 'status']
+        read_only_fields = ['created_by', 'created_at', 'updated_at', 'score', 'user_vote', 'upvotes', 'downvotes']

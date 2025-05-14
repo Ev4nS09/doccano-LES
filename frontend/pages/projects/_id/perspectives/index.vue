@@ -11,7 +11,6 @@
       :is-loading="isLoading"
       :total="items.length"
       :disable-edit="canOnlyAdd"
-      @edit="editItem"
     />
   </v-card>
 </template>
@@ -20,14 +19,12 @@
 import { mapGetters } from 'vuex'
 import Vue from 'vue'
 import PerspectiveList from '@/components/perspective/PerspectiveList.vue'
-import { LabelDTO } from '~/services/application/label/labelData'
 import { MemberItem } from '~/domain/models/member/member'
-import { ApiPerspectiveRepository } from '@/repositories/perspective/apiPerspectiveRepository'
-import { Perspective } from '~/domain/models/perspective/perspective'
+ import { PerspectiveItem } from '~/domain/models/perspective/perspective'
 
 export default Vue.extend({
   components: {
-    PerspectiveList, 
+    PerspectiveList,
   },
 
   layout: 'project',
@@ -37,13 +34,19 @@ export default Vue.extend({
   data() {
     return {
       dialogDelete: false,
-      items: [] as Perspective[],
-      selected: [] as Perspective[],
+      items: [] as PerspectiveItem[],
+      selected: [] as PerspectiveItem[],
       isLoading: false,
       tab: 0,
       member: {} as MemberItem
     }
   },
+
+  async fetch() {
+        this.isLoading = true
+        this.items = await this.$repositories.perspective.list(this.projectId)
+        this.isLoading = false
+    },
 
   computed: {
     ...mapGetters('projects', ['project']),
@@ -64,19 +67,6 @@ export default Vue.extend({
     },
 
   },
-  
-  async fetch() {
-      const API = new ApiPerspectiveRepository()
-      this.isLoading = true
-        try{
-          this.items = await API.list(this.projectId)
-        }
-        catch{
-            console.error("FDS")
-        }
-      this.isLoading = false
-    },
-
   watch: {
     tab() {
       this.list()
@@ -85,26 +75,8 @@ export default Vue.extend({
 
   methods: {
     async list() {
-      const API = new ApiPerspectiveRepository()
-      this.isLoading = true
-      this.items = await API.list(this.projectId)
-      this.isLoading = false
     },
 
-    async remove() {
-      await this.service.bulkDelete(this.projectId, this.selected)
-      this.list()
-      this.dialogDelete = false
-      this.selected = []
-    },
-
-    async download() {
-      await this.service.export(this.projectId)
-    },
-
-    editItem(item: LabelDTO) {
-      this.$router.push(`labels/${item.id}/edit?type=${this.labelType}`)
-    }
   }
 })
 </script>

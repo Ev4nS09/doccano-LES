@@ -71,8 +71,6 @@ INSTALLED_APPS = [
     "health_check.contrib.migrations",
     "health_check.contrib.celery",
     "django_cleanup",
-    "perspective_types",
-    "perspectives"
 ]
 
 MIDDLEWARE = [

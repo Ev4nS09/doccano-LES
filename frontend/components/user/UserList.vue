@@ -3,15 +3,12 @@
     :value="value"
     :headers="headers"
     :items="items"
-    :options.sync="options"
-    :server-items-length="total"
     :search="search"
     :loading="isLoading"
     :loading-text="$t('generic.loading')"
     :no-data-text="$t('vuetify.noDataAvailable')"
     :footer-props="{
       showFirstLastPage: true,
-      'items-per-page-options': [10, 50, 100],
       'items-per-page-text': $t('vuetify.itemsPerPageText'),
       'page-text': $t('dataset.pageText')
     }"
@@ -19,16 +16,16 @@
     show-select
     @input="$emit('input', $event)"
   >
-    <template #top>
-      <v-text-field
-        v-model="search"
-        :prepend-inner-icon="mdiMagnify"
-        :label="$t('generic.search')"
-        single-line
-        hide-details
-        filled
-      />
-    </template>
+	  <template #top>
+		<v-text-field
+		  v-model="search"
+		  :prepend-inner-icon="mdiMagnify"
+		  :label="$t('generic.search')"
+		  single-line
+		  hide-details
+		  filled
+		/>
+	  </template>
   </v-data-table>
 </template>
 
@@ -67,7 +64,7 @@ export default Vue.extend({
 
   data() {
     return {
-      search: this.$route.query.q,
+      search: '',
       options: {} as DataOptions,
       mdiMagnify,
       dateFormat,
@@ -93,22 +90,12 @@ export default Vue.extend({
           query: {
             limit: this.options.itemsPerPage.toString(),
             offset: ((this.options.page - 1) * this.options.itemsPerPage).toString(),
-            q: this.search
+q: this.search
           }
         })
       },
       deep: true
     },
-    search() {
-      this.updateQuery({
-        query: {
-          limit: this.options.itemsPerPage.toString(),
-          offset: '0',
-          q: this.search
-        }
-      })
-      this.options.page = 1
-    }
   },
 
   methods: {
