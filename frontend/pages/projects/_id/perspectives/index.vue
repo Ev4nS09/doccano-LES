@@ -20,7 +20,7 @@ import { mapGetters } from 'vuex'
 import Vue from 'vue'
 import PerspectiveList from '@/components/perspective/PerspectiveList.vue'
 import { MemberItem } from '~/domain/models/member/member'
- import { PerspectiveItem } from '~/domain/models/perspective/perspective'
+ import { PerspectiveItem } from '~/domain/models/perspective/perspectiveItem'
 
 export default Vue.extend({
   components: {

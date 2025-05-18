@@ -1,6 +1,5 @@
 from django.urls import path
 from .views import (
-    ExamplePerspectiveStats,
     ItemListCreate,
     ValueListCreate,
     ValueDetail
@@ -8,7 +7,7 @@ from .views import (
 
 urlpatterns = [
     path(
-        route="items",
+        route="projects/<int:project_id>/perspectives",
         view=ItemListCreate.as_view(),
         name="item_list"
     ),
@@ -21,10 +20,5 @@ urlpatterns = [
         route="examples/<int:example_id>/values/<int:pk>",
         view=ValueDetail.as_view(),
         name="value_detail"
-    ),
-    path(
-        route="examples/<int:example_id>/perspective-stats",
-        view=ExamplePerspectiveStats.as_view(),
-        name="example_perspective_stats"
     ),
 ]

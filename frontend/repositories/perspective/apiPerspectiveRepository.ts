@@ -1,4 +1,4 @@
-import { PerspectiveItem } from '@/domain/models/perspective/perspective'
+import { PerspectiveItem } from '@/domain/models/perspective/perspectiveItem'
 import ApiService from '@/services/api.service'
 
 function toModel(item: { [key: string]: any }): PerspectiveItem {
@@ -6,7 +6,7 @@ function toModel(item: { [key: string]: any }): PerspectiveItem {
     item.id,
     item.name,
     item.project,
-    item.p_type,
+    item.item_type,
     item.selection_list,
     item.createdAt,
     item.updatedAt,
@@ -18,7 +18,7 @@ function toPayload(item: PerspectiveItem): { [key: string]: any } {
     id: item.id,
     name: item.name,
     project: item.project,
-    p_type: item.p_type,
+    item_type: item.item_type,
     selection_list: item.selection_list,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,

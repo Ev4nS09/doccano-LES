@@ -8,7 +8,8 @@ class Item(models.Model):
     """Classification item directly tied to a project"""
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='classification_items')
     name = models.CharField(max_length=100)
-    item_type = models.CharField(max_length=100, default="list")
+    selection_list = models.JSONField(blank=True, default=list)
+    item_type = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -24,60 +25,26 @@ class Item(models.Model):
     def __str__(self):
         return f"{self.name} ({self.project.name})"
 
-class ItemValue(models.Model):
-    """Predefined values for an item"""
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='predefined_values')
-    name = models.CharField(max_length=200)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('item', 'name')
-        ordering = ['name']
-
-    def __str__(self):
-        return f"{self.item.name}: {self.name}"
-
 class Value(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    item_value = models.ForeignKey(ItemValue, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    value = models.TextField(null=True, blank=True)
+    value = models.TextField()
 
     class Meta:
         unique_together = ('member', 'item')
         ordering = ['-created_at']
 
     def __str__(self):
-        if self.item_value:
-            return f"{self.item.name}: {self.item_value.name} (by {self.member.user.username})"
-        else:
-            return self.value
+        return self.value
 
     def clean(self):
         if self.member.role.name != "annotator":
             raise ValidationError("The value must be created by an annotator")
 
-        if self.item_value:
-            if self.item_value.item != self.item:
-                raise ValidationError("Selected value doesn't belong to the specified item")
-
 
         expected_type = self.item.item_type
         val = self.value.strip()
-
-
-          # Enforce item_value vs value nullability rules
-        if expected_type == "list":
-            if self.value:
-                raise ValidationError("Value must be null when item_type is 'list'")
-            if not self.item_value:
-                raise ValidationError("item_value must be set when item_type is 'list'")
-        else:
-            if not self.value:
-                raise ValidationError("Value must be set when item_type is not 'list'")
-            if self.item_value:
-                raise ValidationError("item_value must be null when item_type is not 'list'")
 
         try:
             if expected_type == "int":
@@ -91,7 +58,8 @@ class Value(models.Model):
                 # Already a string, nothing to check
                 pass
             elif expected_type == "list":
-                pass
+                if val not in self.item.selection_list:
+                    raise ValidationError(f"Value must be one of: {self.item.selection_list}")
             else:
                 raise ValidationError(f"Unknown p_type: {expected_type}")
         except Exception as e:
