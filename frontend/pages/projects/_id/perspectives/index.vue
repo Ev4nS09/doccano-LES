@@ -45,6 +45,7 @@ export default Vue.extend({
   async fetch() {
         this.isLoading = true
         this.items = await this.$repositories.perspective.list(this.projectId)
+        console.error(this.items[1].selection_list[2])
         this.isLoading = false
     },
 

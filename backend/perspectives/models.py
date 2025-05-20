@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 
 class Item(models.Model):
     """Classification item directly tied to a project"""
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='classification_items')
     name = models.CharField(max_length=100)
     selection_list = models.JSONField(blank=True, default=list)
     item_type = models.CharField(max_length=100)

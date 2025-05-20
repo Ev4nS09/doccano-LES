@@ -3,21 +3,22 @@ from .models import Item, Value
 from examples.models import Example
 
 class ItemSerializer(serializers.ModelSerializer):
-    project_name = serializers.CharField(source='project.name', read_only=True)
-
     class Meta:
         model = Item
         fields = [
-                  'id', 
-                  'project', 
-                  'project_name', 
-                  'name', 
-                  'item_type', 
-                  'selection_list',
-                  'predefined_values', 
-                  'created_at', 
-                  'updated_at'
-                  ]
+            'id',
+            'name',
+            'selection_list',
+            'item_type',
+            'created_at',
+            'updated_at'
+        ]
+
+    def validate_item_type(self, value):
+        allowed_types = ["int", "bool", "string", "float", "list"]
+        if value not in allowed_types:
+            raise serializers.ValidationError(f"Invalid item_type. Allowed values are: {allowed_types}")
+        return value
 
 class ValueSerializer(serializers.ModelSerializer):
     item_name = serializers.CharField(source='item.name', read_only=True)

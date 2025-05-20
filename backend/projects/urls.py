@@ -31,6 +31,6 @@ urlpatterns = [
     ),
 
     #path('projects/<int:project_id>/perspectives', PerspectiveListCreateView.as_view(), name='perspective_list'),
-    path('projects/<int:project_id>/perspectives/<int:perspective_id>', PerspectiveDeleteView.as_view(), name='perspective_delete'),
+    #path('projects/<int:project_id>/perspectives/<int:perspective_id>', PerspectiveDeleteView.as_view(), name='perspective_delete'),
 
 ]

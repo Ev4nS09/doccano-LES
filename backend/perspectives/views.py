@@ -13,13 +13,14 @@ from .serializers import ItemSerializer, ValueSerializer
 class ItemListCreate(generics.ListCreateAPIView):
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
-    
+
     def get_queryset(self):
-        return Item.objects.filter(project_id=self.kwargs['project_id'])
-    
+        project_id = self.kwargs['project_id']
+        return Item.objects.filter(project_id=project_id)
+
     def perform_create(self, serializer):
-        project = get_object_or_404(Project, pk=self.kwargs['project_id'])
-        serializer.save(project=project)
+        project_id = self.kwargs['project_id']
+        serializer.save(project_id=project_id)
 
 class ValueListCreate(generics.ListCreateAPIView):
     serializer_class = ValueSerializer
