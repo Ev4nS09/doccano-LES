@@ -72,7 +72,8 @@ export class Project {
     readonly createdAt: string = '',
     readonly updatedAt: string = '',
     readonly author: string = '',
-    readonly isTextProject: boolean = false
+    readonly isTextProject: boolean = false,
+    readonly items: number[] = [],
   ) {
     if (!validateMinLength(_name)) {
       throw new Error('Project name is required')
@@ -104,7 +105,7 @@ export class Project {
     enableGraphemeMode: boolean,
     useRelation: boolean,
     tags: TagItem[],
-    allowMemberToCreateLabelType: boolean
+    allowMemberToCreateLabelType: boolean,
   ) {
     return new Project(
       id,
@@ -119,7 +120,7 @@ export class Project {
       enableGraphemeMode,
       useRelation,
       tags,
-      allowMemberToCreateLabelType
+      allowMemberToCreateLabelType,
     )
   }
 

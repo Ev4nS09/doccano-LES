@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import (
+    PerspectiveListCreate,
+    PerspectiveItemsListCreate,
     ItemListCreate,
     ValueListCreate,
     ValueDetail
@@ -7,8 +9,13 @@ from .views import (
 
 urlpatterns = [
     path(
-        route="projects/<int:project_id>/perspectives",
-        view=ItemListCreate.as_view(),
-        name="item_list"
+        route="perspectives",
+        view=PerspectiveListCreate.as_view(),
+        name="perspective_list"
+    ),
+    path(
+        route="perspectives/<int:perspective_id>/items",
+        view=PerspectiveItemsListCreate.as_view(),
+        name="perspective_items_list"
     ),
 ]

@@ -5,22 +5,32 @@ from rest_framework.response import Response
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from examples.models import Example
-from projects.models import Project
+#from projects.models import Project
 from projects.permissions import IsProjectMember
-from .models import Item, Value
-from .serializers import ItemSerializer, ValueSerializer
+from .models import Perspective, Item, Value
+from .serializers import PerspectiveSerializer, ItemSerializer, ValueSerializer
+
+class PerspectiveListCreate(generics.ListCreateAPIView):
+    serializer_class = PerspectiveSerializer
+    permission_classes = [IsAuthenticated & IsProjectMember]
+    queryset = Perspective.objects.all()
+
+    
+class PerspectiveItemsListCreate(generics.ListAPIView):
+    """
+    List all items belonging to a specific perspective
+    """
+    serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        perspective_id = self.kwargs['perspective_id']
+        perspective = get_object_or_404(Perspective, id=perspective_id)
+        return perspective.items.all()
 
 class ItemListCreate(generics.ListCreateAPIView):
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
-
-    def get_queryset(self):
-        project_id = self.kwargs['project_id']
-        return Item.objects.filter(project_id=project_id)
-
-    def perform_create(self, serializer):
-        project_id = self.kwargs['project_id']
-        serializer.save(project_id=project_id)
 
 class ValueListCreate(generics.ListCreateAPIView):
     serializer_class = ValueSerializer

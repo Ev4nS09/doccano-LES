@@ -1,6 +1,18 @@
 from rest_framework import serializers
-from .models import Item, Value
+from .models import Item, Perspective, Value
 from examples.models import Example
+
+class PerspectiveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Perspective 
+        fields = [
+            'id',
+            'name',
+            'items',
+            'created_at',
+            'updated_at'
+        ]
+
 
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,7 +38,7 @@ class ValueSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Value
-        fields = ['id', 'member', 'item', 'item_name', 'value', 'user_name', 'created_at']
+        fields = ['id', 'member', 'item', 'item_name', 'perspective', 'perspective_name', 'value', 'user_name', 'created_at']
         extra_kwargs = {
             'user': {'write_only': True}
         }

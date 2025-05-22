@@ -43,7 +43,8 @@ function toModel(item: { [key: string]: any }): Project {
     item.created_at,
     item.updated_at,
     item.author,
-    item.is_text_project
+    item.is_text_project,
+    item.items,
   )
 }
 
@@ -62,7 +63,8 @@ function toPayload(item: Project): { [key: string]: any } {
     use_relation: item.useRelation,
     tags: item.tags,
     allow_member_to_create_label_type: item.allowMemberToCreateLabelType,
-    resourcetype: item.resourceType
+    resourcetype: item.resourceType,
+    items: item.items
   }
 }
 

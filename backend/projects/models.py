@@ -8,9 +8,11 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Manager
 from django.db.models.fields.related_descriptors import create_forward_many_to_many_manager
+import perspectives
 from polymorphic.models import PolymorphicModel
 
 from roles.models import Role
+from perspectives.models import Item
 
 
 class ProjectType(models.TextChoices):
@@ -41,6 +43,8 @@ class Project(PolymorphicModel):
     collaborative_annotation = models.BooleanField(default=False)
     single_class_classification = models.BooleanField(default=False)
     allow_member_to_create_label_type = models.BooleanField(default=False)
+
+    perspective = models.ForeignKey('perspectives.Perspective',on_delete=models.CASCADE, blank=True)
 
     def add_admin(self):
         admin_role = Role.objects.get(name=settings.ROLE_PROJECT_ADMIN)

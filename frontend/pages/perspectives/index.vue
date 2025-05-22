@@ -20,22 +20,20 @@ import { mapGetters } from 'vuex'
 import Vue from 'vue'
 import PerspectiveList from '@/components/perspective/PerspectiveList.vue'
 import { MemberItem } from '~/domain/models/member/member'
- import { PerspectiveItem } from '~/domain/models/perspective/perspectiveItem'
+ import { Perspective } from '~/domain/models/perspective/perspective'
 
 export default Vue.extend({
   components: {
     PerspectiveList,
   },
 
-  layout: 'project',
-
   middleware: ['check-auth', 'auth', 'setCurrentProject'],
 
   data() {
     return {
       dialogDelete: false,
-      items: [] as PerspectiveItem[],
-      selected: [] as PerspectiveItem[],
+      items: [] as Perspective[],
+      selected: [] as Perspective[],
       isLoading: false,
       tab: 0,
       member: {} as MemberItem
@@ -44,8 +42,7 @@ export default Vue.extend({
 
   async fetch() {
         this.isLoading = true
-        this.items = await this.$repositories.perspective.list(this.projectId)
-        console.error(this.items[1].selection_list[2])
+        this.items = await this.$repositories.perspective.listPerspective()
         this.isLoading = false
     },
 
@@ -86,4 +83,4 @@ export default Vue.extend({
 ::v-deep .v-dialog {
   width: 800px;
 }
-</style>
+</style> 

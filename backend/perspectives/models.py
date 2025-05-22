@@ -1,8 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from projects.models import Project, Member
-from examples.models import Example
-from django.contrib.auth.models import User
+#from projects.models import Project
+#from django.contrib.auth.models import User
+
 
 class Item(models.Model):
     """Classification item directly tied to a project"""
@@ -12,20 +12,26 @@ class Item(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = ('project', 'name')
-        ordering = ['name']
-
     def clean(self):
         allowed_types = ["int", "bool", "string", "float", "list"]
         if self.item_type not in allowed_types:
             raise ValidationError(f"Invalid p_type. Allowed values are: {allowed_types}")
 
     def __str__(self):
-        return f"{self.name} ({self.project.name})"
+        return f"{self.name}"
 
+class Perspective(models.Model):
+    name = models.CharField(max_length=100)
+    items = models.ManyToManyField(Item)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+            
 class Value(models.Model):
-    member = models.ForeignKey(Member, on_delete=models.CASCADE)
+    member = models.ForeignKey('projects.Member', on_delete=models.CASCADE)
+    perspective = models.ForeignKey(Perspective, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     value = models.TextField()
@@ -41,7 +47,16 @@ class Value(models.Model):
         if self.member.role.name != "annotator":
             raise ValidationError("The value must be created by an annotator")
 
+        if not self.perspective.items.filter(id=self.item.id).exists():
+            raise ValidationError(
+                f"Item '{self.item.name}' does not belong to perspective '{self.perspective.name}'"
+            )
 
+        member_project = self.member.project  # Adjust if Member links to Project differently
+        if not Perspective.objects.filter(id=self.perspective.id, project=member_project).exists():
+            raise ValidationError(
+            f"Perspective '{self.perspective.name}' does not belong to the member's project"
+        )
         expected_type = self.item.item_type
         val = self.value.strip()
 

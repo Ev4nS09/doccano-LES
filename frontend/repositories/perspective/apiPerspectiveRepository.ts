@@ -1,11 +1,10 @@
-import { PerspectiveItem } from '@/domain/models/perspective/perspectiveItem'
+import { PerspectiveItem, Perspective } from '@/domain/models/perspective/perspective'
 import ApiService from '@/services/api.service'
 
-function toModel(item: { [key: string]: any }): PerspectiveItem {
+function toModelPerspectiveItem(item: { [key: string]: any }): PerspectiveItem {
   return new PerspectiveItem(
     item.id,
     item.name,
-    item.project,
     item.item_type,
     item.selection_list,
     item.createdAt,
@@ -13,11 +12,20 @@ function toModel(item: { [key: string]: any }): PerspectiveItem {
   )
 }
 
-function toPayload(item: PerspectiveItem): { [key: string]: any } {
+function toModelPerspective(item: { [key: string]: any }): Perspective {
+  return new Perspective(
+    item.id,
+    item.name,
+    item.items,
+    item.createdAt,
+    item.updatedAt,
+  )
+}
+
+function toPayloadPerspectiveItem(item: PerspectiveItem): { [key: string]: any } {
   return {
     id: item.id,
     name: item.name,
-    project: item.project,
     item_type: item.item_type,
     selection_list: item.selection_list,
     createdAt: item.createdAt,
@@ -28,16 +36,22 @@ function toPayload(item: PerspectiveItem): { [key: string]: any } {
 export class APIPerspectiveRepository {
   constructor(private readonly request = ApiService) {}
     
-  async list(projectId: string): Promise<PerspectiveItem[]> {
-    const url = `/projects/${projectId}/perspectives`
+  async listPerspectiveItem(perspectiveId: string): Promise<PerspectiveItem[]> {
+    const url = `perspectives/${perspectiveId}/items`
     const response = await this.request.get(url)
-    return response.data.results.map((item: { [key: string]: any }) => toModel(item))
+    return response.data.results.map((item: { [key: string]: any }) => toModelPerspective(item))
   }
 
-  async create(projectId: string, item: PerspectiveItem): Promise<PerspectiveItem> {
-    const url = `/projects/${projectId}/perspectives`
-    const payload = toPayload(item)
+  async listPerspective(): Promise<Perspective[]> {
+    const url = `perspectives`
+    const response = await this.request.get(url)
+    return response.data.results.map((item: { [key: string]: any }) => toModelPerspectiveItem(item))
+  }
+
+  async createPerspectiveItem(item: PerspectiveItem): Promise<PerspectiveItem> {
+    const url = `perspectives`
+    const payload = toPayloadPerspectiveItem(item)
     const response = await this.request.post(url, payload)
-    return toModel(response.data)
+    return toModelPerspectiveItem(response.data)
   }
 }

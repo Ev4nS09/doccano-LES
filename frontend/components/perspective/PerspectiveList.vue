@@ -36,7 +36,7 @@ import { dateParse } from '@vuejs-community/vue-filter-date-parse'
 import type { PropType } from 'vue'
 import Vue from 'vue'
 import { DataOptions } from 'vuetify/types'
-import { PerspectiveItem } from '~/domain/models/perspective/perspectiveItem'
+import { Perspective } from '~/domain/models/perspective/perspective'
 
 export default Vue.extend({
   props: {
@@ -46,12 +46,12 @@ export default Vue.extend({
       required: true
     },
     items: {
-      type: Array as PropType<PerspectiveItem[]>,
+      type: Array as PropType<Perspective[]>,
       default: () => [],
       required: true
     },
     value: {
-      type: Array as PropType<PerspectiveItem[]>,
+      type: Array as PropType<Perspective[]>,
       default: () => [],
       required: true
     },
@@ -76,7 +76,6 @@ export default Vue.extend({
     headers(): { text: any; value: string; sortable?: boolean }[] {
       return [
         { text: 'Name', value: 'name' },
-        { text: 'Type', value: 'item_type'},
         { text: 'Created At', value: 'created_at' },
         { text: 'Updated At', value: 'updated_at' },
       ]
