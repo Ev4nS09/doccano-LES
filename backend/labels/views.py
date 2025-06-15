@@ -77,6 +77,18 @@ class BaseDetailAPI(generics.RetrieveUpdateDestroyAPIView):
             self.permission_classes = [IsAuthenticated & IsProjectMember & partial(CanEditLabel, self.queryset)]
         return super().get_permissions()
 
+class CategoryListAllAPI(BaseListAPI):
+    label_class = Category
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        # Ignore the user even if it's not collaborative
+        return self.label_class.objects.filter(example=self.kwargs["example_id"])
+
+    def create(self, request, *args, **kwargs):
+        if self.project.single_class_classification:
+            self.get_queryset().delete()
+        return super().create(request, *args, **kwargs)
 
 class CategoryListAPI(BaseListAPI):
     label_class = Category

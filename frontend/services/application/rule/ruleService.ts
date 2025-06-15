@@ -21,7 +21,9 @@ export class RuleService {
       downvotes: [],
       created_at: '',
       updated_at: '',
-      status: 'On going'
+      status: 'On going',
+      start_at: '',
+      end_at: '',
     })
     return this.toDTO(rule)
   }
@@ -86,7 +88,9 @@ export class RuleService {
 	  comments: (rule as any).comments || [], // Preserve existing comments if present
 	  created_at: rule.created_at,
 	  updated_at: rule.updated_at,
-      status: rule.status
+      status: rule.status,
+      start_at: rule.start_at,
+      end_at: rule.end_at
 	}
   }
 
@@ -102,6 +106,8 @@ export class RuleService {
       dto.created_at,
       dto.updated_at,
       dto.status,
+      dto.start_at,
+      dto.end_at,
     )
   }
 }

@@ -12,6 +12,7 @@ type ProjectFields = {
   enableSharingMode: boolean
   exclusiveCategories: boolean
   tags: string[]
+  perspective: number,
   allowOverlappingSpans: boolean
   enableGraphemeMode: boolean
   useRelation: boolean
@@ -53,6 +54,7 @@ export class ProjectApplicationService {
     enableGraphemeMode,
     useRelation,
     tags,
+    perspective,
     guideline = '',
     allowMemberToCreateLabelType = false
   }: ProjectFields): Promise<Project> {
@@ -69,6 +71,7 @@ export class ProjectApplicationService {
       enableGraphemeMode,
       useRelation,
       tags.map((tag) => TagItem.create(tag)),
+      perspective,
       allowMemberToCreateLabelType
     )
     try {
@@ -91,6 +94,7 @@ export class ProjectApplicationService {
       enableGraphemeMode,
       useRelation,
       guideline = '',
+      perspective,
       allowMemberToCreateLabelType
     }: Omit<ProjectFields, 'tags'>
   ): Promise<void> {
@@ -107,6 +111,7 @@ export class ProjectApplicationService {
       enableGraphemeMode,
       useRelation,
       [],
+      perspective,
       allowMemberToCreateLabelType
     )
 

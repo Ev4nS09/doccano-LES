@@ -16,9 +16,9 @@ from .models import (
     TextClassificationProject,
     AnnotationRule,
     RuleComment,
-    Perspective,
-    UserPerspective,
 )
+
+from perspectives.serializers import PerspectiveSerializer 
 
 
 class MemberSerializer(serializers.ModelSerializer):
@@ -78,6 +78,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "allow_member_to_create_label_type",
             "is_text_project",
             "tags",
+            "perspective",
         ]
         read_only_fields = (
             "created_at",
@@ -87,6 +88,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
+
         tags = TagSerializer(data=validated_data.pop("tags", []), many=True)
         project = self.Meta.model.objects.create(**validated_data)
         tags.is_valid()
@@ -151,16 +153,6 @@ class ProjectPolymorphicSerializer(PolymorphicSerializer):
         **{cls.Meta.model: cls for cls in ProjectSerializer.__subclasses__()},
     }
 
-class PerspectiveSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Perspective
-        fields = ['id', 'name', 'project', 'selection_list', 'p_type', 'created_at', 'updated_at']
-
-class UserPerspectiveSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserPerspective
-        fields = ['id', 'perspective', 'user', 'value', 'created_at', 'updated_at']
-
 class RuleCommentSerializer(serializers.ModelSerializer):
     author_username = serializers.SerializerMethodField()
 
@@ -202,5 +194,8 @@ class AnnotationRuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnnotationRule
         fields = ['id', 'project', 'title', 'description', 'created_by', 'author_username', 
-                 'created_at', 'updated_at', 'score', 'user_vote', 'comments', 'upvotes', 'downvotes', 'status']
-        read_only_fields = ['created_by', 'created_at', 'updated_at', 'score', 'user_vote', 'upvotes', 'downvotes']
+                 'created_at', 'updated_at', 'score', 'user_vote', 'comments', 'upvotes', 'downvotes', 'status',
+                  'start_at', 'end_at'
+                  ]
+        read_only_fields = ['created_by', 'created_at', 'updated_at', 'score', 
+                            'user_vote', 'upvotes', 'downvotes', 'start_at', 'end_at']

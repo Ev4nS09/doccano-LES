@@ -10,10 +10,16 @@ from projects.permissions import IsProjectMember
 from .models import Perspective, Item, Value
 from .serializers import PerspectiveSerializer, ItemSerializer, ValueSerializer
 
+from rest_framework.pagination import PageNumberPagination
+
+class LargePagination(PageNumberPagination):
+    page_size = 100 
+
 class PerspectiveListCreate(generics.ListCreateAPIView):
     serializer_class = PerspectiveSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
     queryset = Perspective.objects.all()
+    pagination_class = LargePagination
 
     
 class PerspectiveItemsListCreate(generics.ListAPIView):
@@ -22,6 +28,7 @@ class PerspectiveItemsListCreate(generics.ListAPIView):
     """
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = LargePagination
 
     def get_queryset(self):
         perspective_id = self.kwargs['perspective_id']
@@ -31,10 +38,13 @@ class PerspectiveItemsListCreate(generics.ListAPIView):
 class ItemListCreate(generics.ListCreateAPIView):
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
+    queryset = Item.objects.all()
+    pagination_class = LargePagination
 
 class ValueListCreate(generics.ListCreateAPIView):
     serializer_class = ValueSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
+    pagination_class = LargePagination
     
     
     def get_serializer_context(self):
@@ -44,3 +54,4 @@ class ValueListCreate(generics.ListCreateAPIView):
 class ValueDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ValueSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
+    pagination_class = LargePagination

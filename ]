@@ -1,0 +1,154 @@
+
+<template>
+  <base-card
+    :disabled="!valid"
+    :title="$t('Item')"
+    :agree-text="$t('generic.save')"
+    :cancel-text="$t('generic.cancel')"
+    @agree="$emit('saveItem', { name: name, perspectiveItems: selectedItems })"
+    @cancel="$emit('cancelIem')"
+  >
+    <template #content>
+      <v-form v-model="valid">
+           
+<v-card-text>
+  <v-form v-model="valid">
+    <v-row dense>
+      <v-col cols="12">
+        <v-text-field
+          v-model="name"
+          label="Item name"
+          placeholder="Enter a name"
+          outlined
+          dense
+          color="primary"
+          :rules="[rules.nameRequired]"
+        />
+      </v-col>
+
+      <v-col cols="12">
+        <v-autocomplete
+          v-model="type"
+          :items="types"
+          :loading="isLoading"
+          hide-no-data
+          outlined
+          item-text="type"
+          :label="('Item Type')"
+          :placeholder="('Select a type')"
+          :rules="[rules.typeRequired]"
+          return-object
+        />
+      </v-col>
+
+      <v-col cols="12">
+            <v-col cols="12">
+              <v-text-field
+                v-model="newItem"
+                label="Add choices"
+                placeholder="Type and press Enter"
+                outlined
+                dense
+                @keydown.enter.prevent="addItem"
+              />
+              
+              <v-chip
+                v-for="(item, index) in items"
+                :key="index"
+                class="ma-1"
+                close
+                @click:close="removeItem(index)"
+              >
+                {{ item }}
+              </v-chip>      </v-col>
+    </v-row>
+  </v-form>
+</v-card-text>
+
+
+                    <template #item="props">
+            {{ $translateRole(props.item.name, $t('members.roles')) }}
+          </template>
+          <template #selection="props">
+            {{ $translateRole(props.item.name, $t('members.roles')) }}
+          </template>
+        </v-select>
+        <v-alert v-show="errorMessage" prominent type="error">
+          <v-row align="center">
+            <v-col class="grow">
+              {{ errorMessage }}
+            </v-col>
+          </v-row>
+        </v-alert>
+      </v-form>
+    </template>
+  </base-card>
+</template>
+
+<script lang="ts">
+import { mdiAccount, mdiCreditCardOutline } from '@mdi/js'
+import type { PropType } from 'vue'
+import Vue from 'vue'
+import BaseCard from '@/components/utils/BaseCard.vue'
+// import { PerspectiveItem } from '~/domain/models/perspective/perspective'
+import { Perspective } from '~/domain/models/perspective/perspective'
+
+export default Vue.extend({
+  components: {
+    BaseCard
+  },
+
+  props: {
+    value: {
+      type: Object as PropType<Perspective>,
+      required: true
+    },
+    errorMessage: {
+      type: String,
+      default: ''
+    }
+  },
+
+  data() {
+    return {
+      isLoading: false,
+      valid: false,
+      selectedItems: [] as string[],
+      name: '',
+      mdiAccount,
+      mdiCreditCardOutline,
+      rules: {
+        nameRequired: (v: string) => (!!v) || 'Name Required',
+        typeRequired: (v: string) => (!!v) || 'Type Required',
+        itemRequired: (v: string[]) => (!!v.length) || 'At least one item requeired'
+      },
+      type: '',
+      types: ['int', 'float', 'bool', 'list']
+    }
+  },
+
+  async fetch() {
+    this.isLoading = true
+    this.perspectiveItems = await this.$repositories.perspective.listAllPerspectiveItem()
+    this.isLoading = false
+  },
+
+  computed: {
+  },
+
+  watch: {
+    name() {
+      // Items have already been loaded
+      if (this.perspectiveItems.length > 0) return
+
+      // Items have already been requested
+      if (this.isLoading) return
+
+      this.$fetch()
+    }
+  },
+
+  async created() {
+  }
+})
+</script>

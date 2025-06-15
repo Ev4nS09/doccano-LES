@@ -1,6 +1,5 @@
 <template>
   <div>
-    <span>NPC</span>
     <v-text-field
       v-bind="$attrs"
       :value="value"

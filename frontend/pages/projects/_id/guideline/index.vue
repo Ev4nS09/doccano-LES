@@ -33,7 +33,7 @@
       @chat="openChat"
       @upvote="upvoteRule"
       @downvote="downvoteRule"
-      @status="updateStatus"
+      @votes="showVotes"
     />
 
     <!-- Details Dialog -->
@@ -56,6 +56,18 @@
         @refresh="refreshRule"
       />
     </v-dialog>
+
+    <v-dialog v-model="showVoteDialog" max-width="800">
+      <rule-vote 
+        v-if="selectedRule" 
+        :rule="selectedRule"
+        :project-id="projectId"
+        @close="showVoteDialog = false"
+        @update-rule="handleRuleUpdate"
+        @error="showError"
+      />
+    </v-dialog>
+
   </v-card>
 </template>
 
@@ -65,6 +77,7 @@ import RuleActionMenu from '~/components/rule/ActionMenu.vue'
 import RuleList from '~/components/rule/RuleList.vue'
 import RuleDetails from '~/components/rule/RuleDetails.vue'
 import RuleChat from '~/components/rule/RuleChat.vue'
+import RuleVote from '~/components/rule/RuleVote.vue'
 import { RuleDTO } from '~/services/application/rule/ruleData'
 
 export default Vue.extend({
@@ -72,6 +85,7 @@ export default Vue.extend({
     RuleActionMenu,
     RuleList,
     RuleDetails,
+    RuleVote,
     RuleChat
   },
 
@@ -91,6 +105,7 @@ export default Vue.extend({
       isLoading: false,
       selectedRule: null as RuleDTO | null,
       showDetailsDialog: false,
+      showVoteDialog: false,
       showChatDialog: false
     }
   },
@@ -186,18 +201,16 @@ export default Vue.extend({
     },
 
 
-    async updateStatus(rule: RuleDTO) {
-      try {
-        if(rule.score > 0)
-            await this.$services.rule.status(parseInt(this.projectId), rule.id, 1)
-        else 
-            await this.$services.rule.status(parseInt(this.projectId), rule.id, -1)
+    showVotes(rule: RuleDTO) {
+        this.selectedRule = rule
+        this.showVoteDialog = true
+        },
 
-        await this.listRules()
-      } catch (e) {
-        console.error('Failed to update status', e)
-      }
-    },
+    handleRuleUpdate(updatedRule: RuleDTO) {
+    this.rules = this.rules.map(r => 
+      r.id === updatedRule.id ? updatedRule : r
+    )
+  },
 
     async remove() {
       try {

@@ -9,7 +9,9 @@ export class Rule {
 	  readonly downvotes: number[],
 	  readonly created_at: string,
 	  readonly updated_at: string,
-      readonly status: string
+      readonly status: string,
+      readonly start_at: string,
+      readonly end_at: string
 	) {
 	  if (!title.trim()) throw new Error('Title is required')
 	  if (!description.trim()) throw new Error('Description is required')
@@ -31,6 +33,8 @@ export class Rule {
 	  created_at: string = '',
 	  updated_at: string = '',
       status: string = 'On going',
+      start_at: string = '',
+      end_at: string = '',
 	): Rule {
 	  return new Rule(
 		id,
@@ -43,6 +47,8 @@ export class Rule {
 		created_at,
 		updated_at,
         status,
+        start_at,
+        end_at
 	  )
 	}
   }

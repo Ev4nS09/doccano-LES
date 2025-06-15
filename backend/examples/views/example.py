@@ -52,3 +52,6 @@ class ExampleDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExampleSerializer
     lookup_url_kwarg = "example_id"
     permission_classes = [IsAuthenticated & (IsProjectAdmin | IsProjectStaffAndReadOnly)]
+
+
+

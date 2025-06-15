@@ -5,6 +5,7 @@ from .views import (
     BoundingBoxListAPI,
     CategoryDetailAPI,
     CategoryListAPI,
+    CategoryListAllAPI,
     RelationDetail,
     RelationList,
     SegmentationDetailAPI,
@@ -22,7 +23,7 @@ urlpatterns = [
         view=RelationDetail.as_view(),
         name="relation_detail",
     ),
-    path(route="examples/<int:example_id>/categories", view=CategoryListAPI.as_view(), name="category_list"),
+    path(route="examples/<int:example_id>/categories", view=CategoryListAllAPI.as_view(), name="category_list"),
     path(
         route="examples/<int:example_id>/categories/<int:annotation_id>",
         view=CategoryDetailAPI.as_view(),

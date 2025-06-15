@@ -1,3 +1,4 @@
+
 <template>
   <v-data-table
     :value="value"
@@ -72,9 +73,6 @@
       >
       <v-btn small color="primary text-capitalize" @click="toLabeling(item)">
         {{ $t('dataset.annotate') }}
-      </v-btn>
-      <v-btn small color="primary text-capitalize" @click="$emit('discrepancies', item)">
-        {{ $t('Discrepancies') }}
       </v-btn>
     </template>
   </v-data-table>

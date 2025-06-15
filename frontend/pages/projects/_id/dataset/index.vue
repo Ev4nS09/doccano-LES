@@ -81,7 +81,18 @@
       @edit="editItem"
       @assign="assign"
       @unassign="unassign"
+      @discrepancies="openDiscrepanciesChat"
     />
+
+
+<v-dialog v-model="showDiscrepanciesChatDialog" max-width="800">
+  <discrepancies-chat 
+    v-if="showDiscrepanciesChatDialog"
+    :example="selectedExample"
+    :projectId="projectId"
+    @close="showDiscrepanciesChatDialog = false"
+  />
+</v-dialog>
   </v-card>
 </template>
 
@@ -90,6 +101,7 @@ import _ from 'lodash'
 import { mapGetters } from 'vuex'
 import Vue from 'vue'
 import { NuxtAppOptions } from '@nuxt/types'
+import DiscrepanciesChat from '@/components/example/DiscrepanciesChat.vue'
 import DocumentList from '@/components/example/DocumentList.vue'
 import FormAssignment from '~/components/example/FormAssignment.vue'
 import FormDelete from '@/components/example/FormDelete.vue'
@@ -111,7 +123,8 @@ export default Vue.extend({
     FormAssignment,
     FormDelete,
     FormDeleteBulk,
-    FormResetAssignment
+    FormResetAssignment,
+    DiscrepanciesChat ,
   },
 
   layout: 'project',
@@ -133,7 +146,9 @@ export default Vue.extend({
       members: [] as MemberItem[],
       user: {} as MemberItem,
       isLoading: false,
-      isProjectAdmin: false
+      showDiscrepanciesChatDialog : false,
+      isProjectAdmin: false,
+      selectedExample: null as ExampleDTO | null
     }
   },
 
@@ -204,6 +219,11 @@ export default Vue.extend({
         path: this.localePath(link),
         query
       })
+    },
+
+    openDiscrepanciesChat(item: ExampleDTO) {
+        this.selectedExample = item
+        this.showDiscrepanciesChatDialog = true
     },
 
     editItem(item: ExampleDTO) {

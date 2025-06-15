@@ -7,6 +7,20 @@
         <project-name-field v-model="editedItem.name" outlined autofocus />
         <project-description-field v-model="editedItem.description" outlined />
         <tag-list v-model="editedItem.tags" outlined />
+
+        <v-autocomplete
+          v-model="editedItem.perspective"
+          :items="perspectives"
+          outlined
+          required
+          item-text="name"
+          item-value="id"
+          :label="$t('Perspective')"
+          :placeholder="$t('Select a perspective')"
+          :rules="[rules.perspectiveRequired]"
+          class="mt-8"
+        />
+
         <v-checkbox
           v-if="showExclusiveCategories"
           v-model="editedItem.exclusiveCategories"
@@ -74,6 +88,7 @@ import ProjectTypeField from '~/components/project/ProjectTypeField.vue'
 import RandomOrderField from '~/components/project/RandomOrderField.vue'
 import SharingModeField from '~/components/project/SharingModeField.vue'
 import TagList from '~/components/project/TagList.vue'
+import Perspective from '~/components/perspective/perspective.vue'
 import {
   DocumentClassification,
   ImageClassification,
@@ -93,8 +108,9 @@ const initializeProject = () => {
     enableGraphemeMode: false,
     useRelation: false,
     tags: [] as string[],
+    perspective: -1,
     guideline: '',
-    allowMemberToCreateLabelType: false
+    allowMemberToCreateLabelType: false,
   }
 }
 
@@ -115,8 +131,16 @@ export default Vue.extend({
   data() {
     return {
       valid: false,
-      editedItem: initializeProject()
+      editedItem: initializeProject(),
+      perspectives: [] as Perspective,
+      rules: {
+        perspectiveRequired: (v: Perspective) => (!!v) || 'Perspective Required',
+      },
     }
+  },
+
+  async fetch() {
+    this.perspectives = await this.$repositories.perspective.listPerspective()
   },
 
   computed: {

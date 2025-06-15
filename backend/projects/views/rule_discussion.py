@@ -8,9 +8,15 @@ from projects.models import AnnotationRule, RuleComment
 from projects.permissions import IsProjectMember
 from projects.serializers import AnnotationRuleSerializer, RuleCommentSerializer
 
+from rest_framework.pagination import PageNumberPagination
+
+class LargePagination(PageNumberPagination):
+    page_size = 100 
+
 class AnnotationRuleListCreate(generics.ListCreateAPIView):
     serializer_class = AnnotationRuleSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
+    pagination_class = LargePagination
 
     def get_queryset(self):
         return AnnotationRule.objects.filter(project_id=self.kwargs['project_id'])
@@ -23,9 +29,12 @@ class AnnotationRuleDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AnnotationRuleSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
     lookup_url_kwarg = 'rule_id'
+    pagination_class = LargePagination
+
 
 class VoteOnRule(APIView):
     permission_classes = [IsAuthenticated & IsProjectMember]
+    pagination_class = LargePagination
 
     def post(self, request, project_id, rule_id):
         rule = generics.get_object_or_404(AnnotationRule, pk=rule_id, project_id=project_id)
@@ -51,6 +60,7 @@ class RuleStatusUpdate(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated & IsProjectMember]
     queryset = AnnotationRule.objects.all()
     serializer_class = AnnotationRuleSerializer
+    pagination_class = LargePagination
 
     STATUS_MAP = {
         0: "On going",

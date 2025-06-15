@@ -14,6 +14,8 @@ function toRuleModel(item: any): Rule {
     item.created_at,
     item.updated_at,
     item.status,
+    item.start_at,
+    item.end_at,
   )
 }
 
@@ -34,7 +36,9 @@ export class APIRuleRepository {
   async list(projectId: number): Promise<Rule[]> {
     const url = `/projects/${projectId}/rules`
     const response = await this.request.get(url)
-    return response.data.results.map(toRuleModel)
+    const rule = response.data.results.map(toRuleModel)
+    console.error(rule)
+    return rule
   }
 
   async create(projectId: number, rule: Omit<Rule, "id" | "score">): Promise<Rule> {

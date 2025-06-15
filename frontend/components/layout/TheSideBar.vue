@@ -38,7 +38,7 @@ import {
   mdiHome,
   mdiLabel,
   mdiPlayCircleOutline,
-  mdiEye 
+  mdiAlertOctagon
 } from '@mdi/js'
 import { getLinkToAnnotationPage } from '~/presenter/linkToAnnotationPage'
 
@@ -87,14 +87,6 @@ export default {
             this.project.canDefineLabel
         },
         {
-          icon: mdiEye,
-          text: 'Perspectives',
-          link: 'perspectives',
-          isVisible:
-            (this.isProjectAdmin || this.project.allowMemberToCreateLabelType) &&
-            this.project.canDefineLabel
-        },
-        {
           icon: mdiLabel,
           text: 'Relations',
           link: 'links',
@@ -106,6 +98,12 @@ export default {
           icon: mdiAccount,
           text: this.$t('members.members'),
           link: 'members',
+          isVisible: this.isProjectAdmin
+        },
+        {
+          icon: mdiAlertOctagon,
+          text: this.$t('discrepancies'),
+          link: 'discrepancies',
           isVisible: this.isProjectAdmin
         },
         {

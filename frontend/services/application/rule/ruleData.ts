@@ -22,4 +22,6 @@ export interface RuleDTO {
   created_at: string
   updated_at: string
   status: string
+  start_at: string
+  end_at: string
 }

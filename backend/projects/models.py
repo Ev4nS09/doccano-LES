@@ -228,64 +228,6 @@ class Member(models.Model):
     class Meta:
         unique_together = ("user", "project")
 
-class Perspective(models.Model):
-    name = models.CharField(max_length=100)
-    project = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name="perspective_mappings")
-    selection_list = models.JSONField(blank=True, default=list)
-    p_type = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def clean(self):
-        if Perspective.objects.filter(name=self.name, project=self.project).exclude(pk=self.pk).exists():
-            raise ValidationError("Perspective name must be unique within the same project.")
-
-        allowed_types = ["int", "bool", "string", "float", "list"]
-        if self.p_type not in allowed_types:
-            raise ValidationError(f"Invalid p_type. Allowed values are: {allowed_types}")
-
-    def __str__(self):
-        return self.name
-
-class UserPerspective(models.Model):
-    perspective = models.ForeignKey(to=Perspective, on_delete=models.CASCADE, related_name="user_perspective_mappings")
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="user_mappings")
-    value = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def clean(self):
-        userperpective = self.__class__.objects.exclude(id=self.id)
-        if userperpective.filter(user=self.user, perspective=self.perspective).exists():
-            message = "This user is already linked to this perspective."
-            raise ValidationError(message)
-
-            
-        expected_type = self.perspective.p_type
-        val = self.value.strip()
-
-        try:
-            if expected_type == "int":
-                int(val)
-            elif expected_type == "float":
-                float(val)
-            elif expected_type == "bool":
-                if val.lower() not in ["true", "false"]:
-                    raise ValueError("Not a boolean string")
-            elif expected_type == "string":
-                # Already a string, nothing to check
-                pass
-            elif expected_type == "list":
-                if val not in self.perspective.selection_list:
-                    raise ValidationError(f"Value must be one of: {self.perspective.selection_list}")
-            else:
-                raise ValidationError(f"Unknown p_type: {expected_type}")
-        except Exception as e:
-            raise ValidationError(f"Invalid value for type '{expected_type}': {e}")           
-
-    def perspective_name(self):
-        return self.perspective.name
-
 class AnnotationRule(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='annotation_rules')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -296,6 +238,8 @@ class AnnotationRule(models.Model):
     upvotes = models.ManyToManyField(User, related_name='upvoted_rules', blank=True)
     downvotes = models.ManyToManyField(User, related_name='downvoted_rules', blank=True)
     status = models.CharField(max_length=50)
+    start_at = models.DateTimeField(null=True, blank=True)
+    end_at = models.DateTimeField(null=True, blank=True)
 
     @property
     def score(self):

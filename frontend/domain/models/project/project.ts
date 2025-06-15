@@ -67,13 +67,13 @@ export class Project {
     readonly enableGraphemeMode: boolean,
     readonly useRelation: boolean,
     readonly tags: TagItem[],
+    readonly perspective: number,
     readonly allowMemberToCreateLabelType: boolean = false,
     readonly users: number[] = [],
     readonly createdAt: string = '',
     readonly updatedAt: string = '',
     readonly author: string = '',
     readonly isTextProject: boolean = false,
-    readonly items: number[] = [],
   ) {
     if (!validateMinLength(_name)) {
       throw new Error('Project name is required')
@@ -105,6 +105,7 @@ export class Project {
     enableGraphemeMode: boolean,
     useRelation: boolean,
     tags: TagItem[],
+    perspective: number,
     allowMemberToCreateLabelType: boolean,
   ) {
     return new Project(
@@ -120,6 +121,7 @@ export class Project {
       enableGraphemeMode,
       useRelation,
       tags,
+      perspective,
       allowMemberToCreateLabelType,
     )
   }

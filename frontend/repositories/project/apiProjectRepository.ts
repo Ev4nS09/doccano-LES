@@ -14,7 +14,7 @@ export class SearchQuery {
   readonly sortDesc: boolean = false
 
   constructor(_limit: string, _offset: string, _q?: string, _sortBy?: string, _sortDesc?: string) {
-    this.limit = /^\d+$/.test(_limit) ? parseInt(_limit) : 10
+    this.limit = /^\d+$/.test(_limit) ? parseInt(_limit) : 11
     this.offset = /^\d+$/.test(_offset) ? parseInt(_offset) : 0
     this.q = _q || ''
     this.sortBy = (
@@ -38,13 +38,13 @@ function toModel(item: { [key: string]: any }): Project {
     item.grapheme_mode,
     item.use_relation,
     item.tags.map((tag: { [key: string]: any }) => new TagItem(tag.id, tag.text, tag.project)),
+    item.perspective,
     item.allow_member_to_create_label_type,
     item.users,
     item.created_at,
     item.updated_at,
     item.author,
     item.is_text_project,
-    item.items,
   )
 }
 
@@ -62,9 +62,9 @@ function toPayload(item: Project): { [key: string]: any } {
     grapheme_mode: item.enableGraphemeMode,
     use_relation: item.useRelation,
     tags: item.tags,
+    perspective: item.perspective,
     allow_member_to_create_label_type: item.allowMemberToCreateLabelType,
     resourcetype: item.resourceType,
-    items: item.items
   }
 }
 
@@ -100,6 +100,7 @@ export class APIProjectRepository {
     const url = `/projects`
     const payload = toPayload(item)
     const response = await this.request.post(url, payload)
+        console.error(response)
     return toModel(response.data)
   }
 

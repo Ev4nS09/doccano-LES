@@ -13,8 +13,6 @@ from .models import (
     TextClassificationProject,
     RuleComment,
     AnnotationRule,
-    Perspective,
-    UserPerspective,
 )
 
 
@@ -50,7 +48,7 @@ class RuleCommentInline(admin.TabularInline):
     extra = 0
 
 class AnnotationRuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'project', 'created_by', 'created_at', 'score')
+    list_display = ('title', 'project', 'created_by', 'created_at', 'score', 'start_at', 'end_at')
     list_filter = ('project', 'created_by')
     search_fields = ('title', 'description')
     inlines = [RuleCommentInline]
@@ -79,5 +77,3 @@ admin.site.register(ImageCaptioningProject, ProjectAdmin)
 admin.site.register(ImageClassificationProject, ProjectAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(AnnotationRule,AnnotationRuleAdmin)
-admin.site.register(Perspective,PerspectiveAdmin)
-admin.site.register(UserPerspective,UserPerspectiveAdmin)

@@ -41,25 +41,6 @@
 		</div>
 	  </template>
 	  
-	  <template #[`item.score`]="{ item }">
-		<div class="d-flex align-center">
-		  <v-btn icon small @click.stop="$emit('downvote', item)">
-			<v-icon small :color="item.user_vote === -1 ? 'primary' : ''">
-			  {{ mdiArrowDown }}
-			</v-icon>
-		  </v-btn>
-		  <v-btn icon small @click.stop="$emit('upvote', item)">
-			<v-icon small :color="item.user_vote === 1 ? 'primary' : ''">
-			  {{ mdiArrowUp }}
-			</v-icon>
-		  </v-btn>
-		  
-		  <div class="mx-1">
-			{{ item.score }}
-		  </div>
-		</div>
-	  </template>
-
 	  <template #[`item.status`]="{ item }">
 		<div class="text-truncate" style="max-width: 100px">
 		  {{ item.status }}
@@ -109,7 +90,7 @@
 			  small
 			  v-bind="attrs"
 			  v-on="on"
-			  @click.stop="$emit('status', item)"
+			  @click.stop="$emit('votes', item)"
 			  class="ml-2"
 			>
 			  <v-icon small>
@@ -117,7 +98,7 @@
 			  </v-icon>
 			</v-btn>
 		  </template>
-		  <span>Details</span>
+		  <span>Votes</span>
 		</v-tooltip>
 
 	  </template>
@@ -181,13 +162,7 @@
 			text: 'Description', 
 			value: 'description', 
 			sortable: true,
-			width: '500px'  // Explicit width for column
-		  },
-		  { 
-			text: 'Score', 
-			value: 'score', 
-			sortable: true,
-			width: '150px'  // Fixed width for score column
+			width: '300px'  // Explicit width for column
 		  },
 		  { 
 			text: 'Actions', 

@@ -1,6 +1,5 @@
 from django.urls import path
 
-from .views.perspective import *
 from .views.rule_discussion import VoteOnRule, RuleCommentListCreate, AnnotationRuleListCreate, AnnotationRuleDetail, RuleCommentDetail, RuleStatusUpdate
 from .views.member import MemberDetail, MemberList, MyRole
 from .views.project import CloneProject, ProjectDetail, ProjectList
@@ -29,8 +28,5 @@ urlpatterns = [
         view=RuleStatusUpdate.as_view(),
         name='update-status'
     ),
-
-    #path('projects/<int:project_id>/perspectives', PerspectiveListCreateView.as_view(), name='perspective_list'),
-    #path('projects/<int:project_id>/perspectives/<int:perspective_id>', PerspectiveDeleteView.as_view(), name='perspective_delete'),
 
 ]
