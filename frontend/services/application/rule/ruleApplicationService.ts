@@ -26,15 +26,8 @@ export class RuleApplicationService {
     await this.service.vote(projectId, ruleId, vote)
   }
 
-  async status(projectId: number, ruleId: number, status_value: 1 | -1 | 0): Promise<void> {
+async status(projectId: number, ruleId: number, status_value: 1 | -1 | 0): Promise<void> {
     await this.service.status(projectId, ruleId, status_value)
-  }
-
-  async comment(projectId: number, ruleId: number, content: string): Promise<void> {
-    if (!content.trim()) {
-      throw new Error('Comment cannot be empty')
-    }
-    await this.service.addComment(projectId, ruleId, content)
   }
 
   async deleteRules(projectId: number, rules: RuleDTO[]): Promise<void> {
@@ -42,13 +35,5 @@ export class RuleApplicationService {
       throw new Error('No rules selected')
     }
     await this.service.bulkDelete(projectId, rules)
-  }
-
-  async getWithComments(projectId: number, ruleId: number): Promise<RuleDTO> {
-	try {
-	  return await this.service.getWithComments(projectId, ruleId)
-	} catch (e) {
-	  throw new Error('Failed to fetch rule with comments')
-	}
   }
 }

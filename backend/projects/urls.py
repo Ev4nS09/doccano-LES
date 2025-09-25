@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views.rule_discussion import VoteOnRule, RuleCommentListCreate, AnnotationRuleListCreate, AnnotationRuleDetail, RuleCommentDetail, RuleStatusUpdate
+from .views.rule_discussion import VoteOnRule, AnnotationRuleListCreate, AnnotationRuleDetail, RuleStatusUpdate, TicketCommentListCreate, TicketListCreate, TicketRulesUpdate, TicketDetail
 from .views.member import MemberDetail, MemberList, MyRole
 from .views.project import CloneProject, ProjectDetail, ProjectList
 from .views.tag import TagDetail, TagList
@@ -17,14 +17,16 @@ urlpatterns = [
 	path(route="projects/<int:project_id>/rules", view=AnnotationRuleListCreate.as_view(), name="rule_list"),
     path(route="projects/<int:project_id>/rules/<int:rule_id>", view=AnnotationRuleDetail.as_view(), name="rule_detail"),
     path(route="projects/<int:project_id>/rules/<int:rule_id>/vote", view=VoteOnRule.as_view(), name="rule_vote"),
-    path(route="projects/<int:project_id>/rules/<int:rule_id>/comments", 
-     view=RuleCommentListCreate.as_view(), 
-     name="rule_comments"),
-    path(route="projects/<int:project_id>/rules/<int:rule_id>/comments/<int:comment_id>", 
-        view=RuleCommentDetail.as_view(), 
-        name="rule_comment_detail"),
-    path(
-        route="projects/<int:project_id>/rules/<int:rule_id>/update-status",
+    path(route="projects/<int:project_id>/tickets", view=TicketListCreate.as_view(), name="ticket_list"),
+    path(route="projects/<int:project_id>/tickets/<int:ticket_id>", view=TicketDetail.as_view(), name="ticket_detail"),
+    path(route="projects/<int:project_id>/tickets/<int:ticket_id>/rules", 
+        view=TicketRulesUpdate.as_view(), 
+        name="ticket_rules"),
+    path(route="projects/<int:project_id>/tickets/<int:ticket_id>/comments", 
+        view=TicketCommentListCreate.as_view(), 
+        name="ticket_comments"),
+
+   path(route="projects/<int:project_id>/rules/<int:rule_id>/update-status",
         view=RuleStatusUpdate.as_view(),
         name='update-status'
     ),

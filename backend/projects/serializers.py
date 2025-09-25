@@ -15,7 +15,8 @@ from .models import (
     Tag,
     TextClassificationProject,
     AnnotationRule,
-    RuleComment,
+    Ticket,
+    TicketComment
 )
 
 from perspectives.serializers import PerspectiveSerializer 
@@ -153,28 +154,59 @@ class ProjectPolymorphicSerializer(PolymorphicSerializer):
         **{cls.Meta.model: cls for cls in ProjectSerializer.__subclasses__()},
     }
 
-class RuleCommentSerializer(serializers.ModelSerializer):
+
+class TicketCommentSerializer(serializers.ModelSerializer):
     author_username = serializers.SerializerMethodField()
+    author_role = serializers.SerializerMethodField()
 
     def get_author_username(self, obj):
         return obj.author.username
 
+    def get_author_role(self, obj):
+        project = getattr(obj.ticket, 'project', None)
+        if not project:
+            return None
+
+        member = Member.objects.filter(project=project, user=obj.author).first()
+        return member.role.name if member and member.role else None
+
     class Meta:
-        model = RuleComment
-        fields = ['id', 'author', 'author_username', 'content', 'created_at', 'updated_at']
+        model = TicketComment
+        fields = ['id', 'author', 'author_username', 'author_role', 'content', 'created_at', 'updated_at']
         read_only_fields = ['author', 'created_at', 'updated_at']
 
+
+class TicketSerializer(serializers.ModelSerializer):
+    comments = TicketCommentSerializer(many=True, read_only=True)
+    author_username = serializers.SerializerMethodField()
+    rule_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=AnnotationRule.objects.all(),
+        source='rules',
+        write_only=True,
+        required=False
+    )
+    rules = serializers.SerializerMethodField()
+
+    def get_author_username(self, obj):
+        # Get username from the created_by relation
+        return obj.created_by.username if obj.created_by else None
+
+    def get_rules(self, obj):
+        return list(obj.rules.values_list('id', flat=True))
+
+    class Meta:
+        model = Ticket
+        fields = ['id', 'project', 'title', 'description', 'status', 
+                 'created_by', 'author_username', 'created_at', 
+                 'updated_at', 'comments', 'rule_ids', 'rules']
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
+
 class AnnotationRuleSerializer(serializers.ModelSerializer):
-    comments = serializers.SerializerMethodField()
     author_username = serializers.SerializerMethodField()
     score = serializers.SerializerMethodField()
     user_vote = serializers.SerializerMethodField()
-
-    def get_comments(self, obj):
-        # Only include comments if specifically requested
-        if self.context.get('include_comments', False):
-            return RuleCommentSerializer(obj.comments.all(), many=True).data
-        return []
+    ticket_count = serializers.SerializerMethodField()  # Add this line
 
     def get_author_username(self, obj):
         return obj.created_by.username if obj.created_by else None
@@ -191,11 +223,34 @@ class AnnotationRuleSerializer(serializers.ModelSerializer):
                 return -1
         return 0
 
+    def get_ticket_count(self, obj):  # Add this method
+        return obj.tickets.count()
+
     class Meta:
         model = AnnotationRule
-        fields = ['id', 'project', 'title', 'description', 'created_by', 'author_username', 
-                 'created_at', 'updated_at', 'score', 'user_vote', 'comments', 'upvotes', 'downvotes', 'status',
-                  'start_at', 'end_at'
-                  ]
-        read_only_fields = ['created_by', 'created_at', 'updated_at', 'score', 
-                            'user_vote', 'upvotes', 'downvotes', 'start_at', 'end_at']
+        fields = [
+            'id', 
+            'project', 
+            'title', 
+            'description', 
+            'created_by', 
+            'author_username',
+            'created_at', 
+            'updated_at', 
+            'upvotes',
+            'downvotes',
+            'score', 
+            'status',
+            'start_at',
+            'end_at',
+            'user_vote',
+            'ticket_count'  # Add this field
+        ]
+        read_only_fields = [
+            'created_by', 
+            'created_at', 
+            'updated_at', 
+            'score', 
+            'user_vote',
+            'ticket_count'
+        ]

@@ -26,14 +26,6 @@
               </td>
             </tr>
             <tr>
-              <td><strong>Result</strong></td>
-              <td>
-                <v-chip :color="getResultColor(displayStatus)" dark>
-                  {{ formatStatus(displayStatus) }}
-                </v-chip>
-              </td>
-            </tr>
-            <tr>
               <td><strong>Current Score</strong></td>
               <td>
                 <v-chip :color="getScoreColor(displayScore)" dark>
@@ -49,7 +41,7 @@
                   :color="displayUserVote === 1 ? 'green' : ''"
                   :loading="loading.upvote"
                   @click="handleVote(1)"
-                  :disabled="!canVote || loading.downvote"
+                  :disabled="!canVote || loading.downvote || !canUpvote"
                 >
                   <v-icon>{{ mdiThumbUp }}</v-icon>
                 </v-btn>
@@ -59,7 +51,7 @@
                   :loading="loading.downvote"
                   @click="handleVote(-1)"
                   class="ml-2"
-                  :disabled="!canVote || loading.upvote"
+                  :disabled="!canVote || loading.upvote || !canDownvote"
                 >
                   <v-icon>{{ mdiThumbDown }}</v-icon>
                 </v-btn>
@@ -136,26 +128,45 @@ export default Vue.extend({
         score: 0,
         status: ''
       },
-      statusCheckInterval: null as NodeJS.Timeout | null
+      statusCheckInterval: null as NodeJS.Timeout | null,
+      currentUserId: null as number || null
     }
   },
 
-  created() {
-    this.voteState = {
-      user_vote: this.rule.user_vote,
-      score: this.rule.score,
-      status: this.rule.status
-    }
-    this.setupStatusCheck()
+ mounted() {
+    this.currentUserId = this.$store.state.auth.id
   },
-
-  beforeDestroy() {
-    this.cleanupStatusCheck()
+    
+  watch: {
+    rule: {
+      immediate: true,
+      deep: true,
+      handler(newRule) {
+        this.voteState = {
+          user_vote: newRule.user_vote,
+          score: newRule.score,
+          status: newRule.status
+        }
+      }
+    }
   },
 
   computed: {
+    canUpvote(): boolean {
+      if (!this.canVote) return false
+      // Check if user hasn't voted up or is trying to change their downvote
+      return !this.rule.upvotes?.includes(this.$store.state.auth.id) || 
+             this.rule.downvotes?.includes(this.$store.state.auth.id)
+    },
+    canDownvote(): boolean {
+      if (!this.canVote) return false
+      // Check if user hasn't voted down or is trying to change their upvote
+      return !this.rule.downvotes?.includes(this.$store.state.auth.id) || 
+             this.rule.upvotes?.includes(this.$store.state.auth.id)
+    },
+
     displayScore(): number {
-      return this.voteState.score
+        return this.voteState.score
     },
     displayUserVote(): number {
       return this.voteState.user_vote
@@ -164,6 +175,7 @@ export default Vue.extend({
       return this.voteState.status
     },
     canVote(): boolean {
+    console.error('Vuex user state:', this.$store.state.auth)
       if (!this.rule.start_at || !this.rule.end_at) return false
       const now = new Date()
       const start = new Date(this.rule.start_at)
@@ -174,59 +186,6 @@ export default Vue.extend({
   },
 
   methods: {
-    setupStatusCheck() {
-      this.cleanupStatusCheck()
-      if (this.rule.end_at) {
-        const end = new Date(this.rule.end_at)
-        const now = new Date()
-        const timeRemaining = end.getTime() - now.getTime()
-        
-        if (timeRemaining > 0) {
-          this.statusCheckInterval = setTimeout(() => {
-            this.updateRuleStatus()
-          }, timeRemaining)
-        } else if (this.getVotingStatus() === 'Finished') {
-          this.updateRuleStatus()
-        }
-      }
-    },
-
-    cleanupStatusCheck() {
-      if (this.statusCheckInterval) {
-        clearTimeout(this.statusCheckInterval)
-        this.statusCheckInterval = null
-      }
-    },
-
-    async updateRuleStatus() {
-      if (this.loading.status || this.getVotingStatus() !== 'Finished') return
-      
-      try {
-        this.loading.status = true
-        const newStatus = this.voteState.score > 0 ? 'accepted' : 'rejected'
-        
-        if (this.voteState.status.toLowerCase() !== newStatus) {
-          await this.$services.rule.status(
-            parseInt(this.projectId.toString()),
-            this.rule.id,
-            newStatus === 'accepted' ? 1 : -1
-          )
-          
-          this.voteState.status = newStatus
-          this.$emit('update-rule', {
-            ...this.rule,
-            status: newStatus,
-            score: this.voteState.score,
-            user_vote: this.voteState.user_vote
-          })
-        }
-      } catch (error) {
-        console.error('Status update failed:', error)
-        this.$emit('error', 'Failed to update rule status')
-      } finally {
-        this.loading.status = false
-      }
-    },
 
     async handleVote(vote: number) {
       if (!this.canVote) return
@@ -293,21 +252,20 @@ export default Vue.extend({
     },
 
     getVotingStatus(): string {
-      if (!this.rule.start_at || !this.rule.end_at) return 'Not scheduled'
+
       const now = new Date()
       const start = new Date(this.rule.start_at)
-      const end = new Date(this.rule.end_at)
-      if (now < start) return 'About to Start'
-      if (now > end) return 'Finished'
-      return 'Ongoing'    
+                
+      return start > now ? 'Yet to Start' : this.rule.status
     },
 
     getVotingStatusColor(): string {
-      const status = this.getVotingStatus()
+      const status = this.getVotingStatus().toLowerCase()
       switch(status) {
-        case 'About to Start': return 'orange'
-        case 'Ongoing': return 'green'
-        case 'Finished': return 'red'
+        case 'yet to start': return 'orange'
+        case 'on going': return 'blue'
+        case 'approved': return 'green'
+        case 'rejected': return 'red'
         default: return 'grey'
       }
     },

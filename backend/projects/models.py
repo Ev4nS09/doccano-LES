@@ -248,13 +248,25 @@ class AnnotationRule(models.Model):
     def __str__(self):
         return self.title
 
-class RuleComment(models.Model):
-    rule = models.ForeignKey(AnnotationRule, on_delete=models.CASCADE, related_name='comments')
+
+class Ticket(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tickets')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    status = models.CharField(max_length=20, choices=[
+        ('open', 'Open'),
+        ('in_progress', 'In Progress'),
+        ('resolved', 'Resolved'),
+        ('closed', 'Closed')
+    ], default='open')
+    rules = models.ManyToManyField('AnnotationRule', related_name='tickets')
+
+class TicketComment(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     content = models.TextField()
-
-    def __str__(self):
-        return f"Comment by {self.author.username} on {self.rule.title}"
-

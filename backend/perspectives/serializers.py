@@ -38,7 +38,7 @@ class ValueSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Value
-        fields = ['id', 'member', 'item', 'item_name', 'perspective', 'perspective_name', 'value', 'user_name', 'created_at']
+        fields = ['id', 'member', 'item', 'item_name', 'perspective', 'value', 'user_name', 'created_at']
         extra_kwargs = {
             'user': {'write_only': True}
         }

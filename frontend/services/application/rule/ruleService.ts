@@ -1,6 +1,5 @@
 import { APIRuleRepository } from '@/repositories/rule/apiRuleRepository'
 import { Rule } from '@/domain/models/rule/rule'
-import { Comment } from '@/domain/models/rule/comment'
 import { RuleDTO } from '@/services/application/rule/ruleData'
 
 export class RuleService {
@@ -39,38 +38,6 @@ export class RuleService {
 
   async status(projectId: number, ruleId: number, status_value: 1 | -1 | 0): Promise<void> {
     await this.repository.status(projectId, ruleId, status_value)
-  }
-
-  async addComment(projectId: number, ruleId: number, content: string): Promise<Comment> {
-    return await this.repository.addComment(projectId, ruleId, content)
-  }
-
-  async getWithComments(projectId: number, ruleId: number): Promise<RuleDTO> {
-	const [rule, comments] = await Promise.all([
-	  this.repository.list(projectId).then(rules => 
-		rules.find(r => r.id === ruleId) 
-	  ),
-	  this.repository.getComments(projectId, ruleId)
-	]);
-
-    if (!rule) {
-    throw new Error(`Rule with ID ${ruleId} not found for project ${projectId}`);
-     }
-
-    console.error(comments.at(0)?.content)
-	
-	const dto = this.toDTO(rule);
-	dto.comments = comments.map(comment => ({
-	  id: comment.id,
-	  author: comment.author,
-	  author_username: '', // Will be populated by API
-	  content: comment.content,
-	  created_at: comment.created_at,
-	  updated_at: comment.updated_at
-	}));
-
-	
-	return dto;
   }
 
   private toDTO(rule: Rule): RuleDTO {

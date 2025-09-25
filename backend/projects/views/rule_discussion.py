@@ -4,9 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from projects.models import AnnotationRule, RuleComment
+from projects.models import AnnotationRule, Ticket, TicketComment 
 from projects.permissions import IsProjectMember
-from projects.serializers import AnnotationRuleSerializer, RuleCommentSerializer
+from projects.serializers import AnnotationRuleSerializer, TicketCommentSerializer, TicketSerializer 
 
 from rest_framework.pagination import PageNumberPagination
 
@@ -81,33 +81,66 @@ class RuleStatusUpdate(generics.UpdateAPIView):
 
         return Response({'status': rule.status}, status=status.HTTP_200_OK)
 
-class RuleCommentListCreate(generics.ListCreateAPIView):
-    serializer_class = RuleCommentSerializer
+class TicketListCreate(generics.ListCreateAPIView):
+    serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
 
     def get_queryset(self):
-        return RuleComment.objects.filter(
-            rule_id=self.kwargs['rule_id'],
-            rule__project_id=self.kwargs['project_id']
+        return Ticket.objects.filter(
+            project_id=self.kwargs['project_id']
+        ).select_related('created_by').prefetch_related('rules')
+
+    def perform_create(self, serializer):
+        serializer.save(
+            project_id=self.kwargs['project_id'],
+            created_by=self.request.user  # This will set both created_by and allow username lookup
+        )
+
+class TicketDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = TicketSerializer
+    permission_classes = [IsAuthenticated & IsProjectMember]
+    lookup_url_kwarg = 'ticket_id'
+
+    def get_queryset(self):
+        return Ticket.objects.filter(project_id=self.kwargs['project_id'])
+
+class TicketRulesUpdate(APIView):
+    permission_classes = [IsAuthenticated & IsProjectMember]
+
+    def post(self, request, project_id, ticket_id):
+        ticket = APIView.get_object_or_404(Ticket, pk=ticket_id, project_id=project_id)
+        rule_ids = request.data.get('rule_ids', [])
+        
+        # Validate rules belong to project
+        rules = AnnotationRule.objects.filter(
+            id__in=rule_ids,
+            project_id=project_id
+        )
+        
+        ticket.rules.add(*rules)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def delete(self, request, project_id, ticket_id):
+        ticket = APIView.get_object_or_404(Ticket, pk=ticket_id, project_id=project_id)
+        rule_ids = request.data.get('rule_ids', [])
+        ticket.rules.remove(*rule_ids)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+class TicketCommentListCreate(generics.ListCreateAPIView):
+    serializer_class = TicketCommentSerializer
+    permission_classes = [IsAuthenticated & IsProjectMember]
+
+    def get_queryset(self):
+        return TicketComment.objects.filter(
+            ticket_id=self.kwargs['ticket_id'],
+            ticket__project_id=self.kwargs['project_id']
         ).order_by('created_at')
 
     def perform_create(self, serializer):
-        rule = generics.get_object_or_404(
-            AnnotationRule, 
-            pk=self.kwargs['rule_id'], 
+        ticket = generics.get_object_or_404(
+            Ticket, 
+            pk=self.kwargs['ticket_id'], 
             project_id=self.kwargs['project_id']
         )
-        serializer.save(rule=rule, author=self.request.user)
-
-class RuleCommentDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = RuleCommentSerializer
-    permission_classes = [IsAuthenticated & IsProjectMember]
-    lookup_url_kwarg = 'comment_id'
-
-    def get_queryset(self):
-        return RuleComment.objects.filter(
-            rule_id=self.kwargs['rule_id'],
-            rule__project_id=self.kwargs['project_id']
-        )
-
-
+        serializer.save(ticket=ticket, author=self.request.user)

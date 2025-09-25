@@ -11,6 +11,12 @@ export abstract class AnnotationRepository<T> {
     return response.data.map((item: { [key: string]: any }) => this.toModel(item))
   }
 
+  public async listAll(projectId: string, exampleId: number): Promise<T[]> {
+    const url = `/projects/${projectId}/examples/${exampleId}/${this.labelName}/all`    
+    const response = await this.request.get(url)
+    return response.data.map((item: { [key: string]: any }) => this.toModel(item))
+  }
+
   public async find(projectId: string, exampleId: number, labelId: number): Promise<T> {
     const url = `${this.baseUrl(projectId, exampleId)}/${labelId}`
     const response = await this.request.get(url)

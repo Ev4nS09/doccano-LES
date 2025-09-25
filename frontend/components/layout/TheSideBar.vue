@@ -38,9 +38,9 @@ import {
   mdiHome,
   mdiLabel,
   mdiPlayCircleOutline,
-  mdiAlertOctagon
+  mdiFileChart 
 } from '@mdi/js'
-import { getLinkToAnnotationPage } from '~/presenter/linkToAnnotationPage'
+import { getLinkToAnnotationPage} from '~/presenter/linkToAnnotationPage'
 
 export default {
   props: {
@@ -101,10 +101,10 @@ export default {
           isVisible: this.isProjectAdmin
         },
         {
-          icon: mdiAlertOctagon,
-          text: this.$t('discrepancies'),
-          link: 'discrepancies',
-          isVisible: this.isProjectAdmin
+          icon: mdiFileChart,
+          text: this.$t('Report'),
+          link: 'report',
+          isVisible: true
         },
         {
           icon: mdiCommentAccountOutline,

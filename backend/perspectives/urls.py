@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
     PerspectiveListCreate,
+    PerspectiveDetail,
     PerspectiveItemsListCreate,
     ItemListCreate,
     ValueListCreate,
@@ -12,6 +13,11 @@ urlpatterns = [
         route="perspectives",
         view=PerspectiveListCreate.as_view(),
         name="perspective_list"
+    ),
+    path(
+        route="perspectives/<int:perspective_id>",
+        view=PerspectiveDetail.as_view(),
+        name="perspective_id"
     ),
     path(
         route="perspectives/create",
@@ -27,5 +33,15 @@ urlpatterns = [
         route="perspectives/<int:perspective_id>/items",
         view=PerspectiveItemsListCreate.as_view(),
         name="perspective_items_list"
+    ),
+    path(
+        route="perspectives/values",
+        view=ValueListCreate.as_view(),
+        name="values"
+    ),
+    path(
+        route="perspectives/values/<int:member_id>",
+        view=ValueDetail.as_view(),
+        name="values_member"
     ),
 ]

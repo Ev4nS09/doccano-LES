@@ -1,4 +1,4 @@
-import { PerspectiveItem, Perspective } from '@/domain/models/perspective/perspective'
+import { PerspectiveItem, Perspective, PerspectiveValue } from '@/domain/models/perspective/perspective'
 import ApiService from '@/services/api.service'
 
 function toModelPerspectiveItem(item: { [key: string]: any }): PerspectiveItem {
@@ -19,6 +19,16 @@ function toModelPerspective(item: { [key: string]: any }): Perspective {
     item.items,
     item.createdAt,
     item.updatedAt,
+  )
+}
+
+function toModelPerspectiveValue(item: { [key: string]: any }): PerspectiveValue {
+  return new PerspectiveValue(
+    item.id,
+    item.member,
+    item.item,
+    item.value,
+    item.createdAt,
   )
 }
 
@@ -65,6 +75,12 @@ export class APIPerspectiveRepository {
     return response.data.results.map((item: { [key: string]: any }) => toModelPerspective(item))
   }
 
+  async findPerspectiveById(perspectiveId: string): Promise<Perspective> {
+    const url = `/projects/${perspectiveId}`
+    const response = await this.request.get(url)
+    return toModelPerspective(response.data)
+  }
+
   async createPerspectiveItem(item: PerspectiveItem): Promise<PerspectiveItem> {
     const url = `perspectives/items`
     const payload = toPayloadPerspectiveItem(item)
@@ -78,4 +94,19 @@ export class APIPerspectiveRepository {
     const response = await this.request.post(url, payload)
     return toModelPerspective(response.data)
   }
+
+  async listValues(): Promise<Perspective[]> {
+    const url = `perspectives/values`
+    const response = await this.request.get(url)
+    return response.data.results.map((item: { [key: string]: any }) => 
+            toModelPerspectiveValue(item))
+  }
+
+  async findValueById(memberId: string): Promise<PerspectiveValue[]> {
+    const url = `perspectives/values/${memberId}`
+    const response = await this.request.get(url)
+    return response.data.results.map((item: { [key: string]: any }) => 
+            toModelPerspectiveValue(item))
+  }
+
 }

@@ -1,63 +1,66 @@
 <template>
-	<v-card>
-	  <v-card-title class="primary white--text">
-		{{ rule.title }}
-		<v-spacer />
-		<v-btn icon dark @click="$emit('close')">
-		  <v-icon>mdi-close</v-icon>
-		</v-btn>
-	  </v-card-title>
-	  
-	  <v-card-text class="pa-6">
-		<v-row>
-		  <!-- Left Column - Description -->
-		  <v-col cols="12" md="8" class="d-flex flex-column">
-			<div class="text-h6 mb-4">Description</div>
-			<v-divider class="mb-4" />
-			<div class="description-text flex-grow-1">
-			  {{ rule.description }}
-			</div>
-		  </v-col>
-		  
-		  <!-- Right Column - Metadata -->
-		  <v-col cols="12" md="4">
-			<div class="metadata-container">
-			  <div class="text-h6 mb-4">Details</div>
-			  
+  <v-dialog :value="showDetailsDialog" max-width="800" persistent @input="$emit('close')">
+	  <v-card>
+		<v-card-title class="primary white--text">
+		  {{ rule.title }}
+		  <v-spacer />
+		  <v-btn icon dark @click="close">
+			<v-icon>{{ mdiClose }}</v-icon>
+		  </v-btn>
+		</v-card-title>
+		
+		<v-card-text class="pa-6">
+		  <v-row>
+			<!-- Left Column - Description -->
+			<v-col cols="12" md="8" class="d-flex flex-column">
+			  <div class="text-h6 mb-4">Description</div>
 			  <v-divider class="mb-4" />
-			  
-			  <div class="d-flex align-center mb-3">
-				<v-icon left color="primary">mdi-account</v-icon>
-				<div>
-				  <div class="text-caption grey--text">Created by</div>
-				  <div>{{ authorName }}</div>
+			  <div class="description-text flex-grow-1">
+				{{ rule.description }}
+			  </div>
+			</v-col>
+			
+			<!-- Right Column - Metadata -->
+			<v-col cols="12" md="4">
+			  <div class="metadata-container">
+				<div class="text-h6 mb-4">Details</div>
+				
+				<v-divider class="mb-4" />
+				
+				<div class="d-flex align-center mb-3">
+				  <v-icon left color="primary">{{ mdiAccount }}</v-icon>
+				  <div>
+					<div class="text-caption grey--text">Created by</div>
+					<div>{{ authorName }}</div>
+				  </div>
+				</div>
+				
+				<div class="d-flex align-center mb-3">
+				  <v-icon left color="primary">{{ mdiCalendar }}</v-icon>
+				  <div>
+					<div class="text-caption grey--text">Created at</div>
+					<div>{{ formatDate(rule.created_at) }}</div>
+				  </div>
+				</div>
+				
+				<div class="d-flex align-center">
+				  <v-icon left color="primary">{{ mdiStar }}</v-icon>
+				  <div>
+					<div class="text-caption grey--text">Score</div>
+					<div :class="scoreColorClass">{{ rule.score }}</div>
+				  </div>
 				</div>
 			  </div>
-			  
-			  <div class="d-flex align-center mb-3">
-				<v-icon left color="primary">mdi-calendar</v-icon>
-				<div>
-				  <div class="text-caption grey--text">Created at</div>
-				  <div>{{ formatDate(rule.created_at) }}</div>
-				</div>
-			  </div>
-			  
-			  <div class="d-flex align-center">
-				<v-icon left color="primary">mdi-star</v-icon>
-				<div>
-				  <div class="text-caption grey--text">Score</div>
-				  <div :class="scoreColorClass">{{ rule.score }}</div>
-				</div>
-			  </div>
-			</div>
-		  </v-col>
-		</v-row>
-	  </v-card-text>
-	</v-card>
+			</v-col>
+		  </v-row>
+		</v-card-text>
+	  </v-card>
+	</v-dialog>
   </template>
   
   <script lang="ts">
   import Vue from 'vue'
+  import { mdiStar, mdiCalendar, mdiAccount, mdiClose } from '@mdi/js'
   import { RuleDTO } from '~/services/application/rule/ruleData'
   
   export default Vue.extend({
@@ -69,13 +72,21 @@
 	  projectId: {
 		type: String,
 		required: true
+	  },
+	  showDetailsDialog: {
+		type: Boolean,
+		required: true
 	  }
 	},
   
 	data() {
 	  return {
 		members: [] as any[],
-		isLoadingMembers: false
+		isLoadingMembers: false,
+		mdiStar, 
+		mdiCalendar, 
+		mdiAccount, 
+		mdiClose
 	  }
 	},
   
@@ -86,12 +97,10 @@
 		return 'grey--text'
 	  },
 	  authorName(): string {
-		// First try the direct author_username if available
 		if (this.rule.author_username) {
 		  return this.rule.author_username
 		}
 		
-		// Then try to find in members list
 		if (this.rule.created_by && this.members.length > 0) {
 		  const member = this.members.find(m => m.user === this.rule.created_by)
 		  if (member) {
@@ -99,7 +108,6 @@
 		  }
 		}
 		
-		// Fallback
 		return `User ${this.rule.created_by}`
 	  }
 	},
@@ -128,6 +136,10 @@
 		} finally {
 		  this.isLoadingMembers = false
 		}
+	  },
+  
+	  close() {
+		this.$emit('close')
 	  }
 	}
   })

@@ -26,6 +26,7 @@ import { APIUserRepository } from '@/repositories/user/apiUserRepository'
 import { APISegmentationRepository } from '~/repositories/tasks/apiSegmentationRepository'
 import { APIRuleRepository } from '~/repositories/rule/apiRuleRepository'
 import { APIPerspectiveRepository } from '~/repositories/perspective/apiPerspectiveRepository'
+import { APITicketRepository } from '~/repositories/tickets/apiTicketRepository'
 
 export interface Repositories {
   // User
@@ -76,6 +77,7 @@ export interface Repositories {
     
   // Rule
   rule: APIRuleRepository
+  ticket: APITicketRepository,
 }
 
 declare module 'vue/types/vue' {
@@ -133,6 +135,7 @@ const repositories: Repositories = {
 
   // Rule
   rule: new APIRuleRepository(),
+  ticket: new APITicketRepository(),
 }
 
 const plugin: Plugin = (_, inject) => {

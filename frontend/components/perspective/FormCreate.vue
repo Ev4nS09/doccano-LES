@@ -4,7 +4,7 @@
     :title="$t('Perspective')"
     :agree-text="$t('generic.save')"
     :cancel-text="$t('generic.cancel')"
-    @agree="$emit('save', { name: name, perspectiveItems: selectedItems })"
+    @agree="validateAndSave"
     @cancel="$emit('cancel')"
   >
     <template #content>
@@ -64,16 +64,112 @@
                   </template>
                 </v-autocomplete>
               </v-col>
+
+              <v-col cols="12" class="mt-4">
+                <v-expansion-panels flat>
+                  <v-expansion-panel>
+                    <v-expansion-panel-header class="primary--text">
+                      <template v-slot:default="{ open }">
+                        <v-row no-gutters align="center">
+                          <v-icon left color="primary">
+                            {{ mdiPlus }}
+                          </v-icon>
+                          <span class="font-weight-medium">Create New Item</span>
+                          <v-spacer />
+                          <span v-if="!open && newItem.name" class="text-caption text--secondary">
+                            {{ newItem.name }}
+                          </span>
+                        </v-row>
+                      </template>
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-form v-model="itemFormValid" ref="itemForm" class="px-2">
+                        <v-text-field
+                          v-model="newItem.name"
+                          label="Item name"
+                          placeholder="Enter item name"
+                          outlined
+                          dense
+                          color="primary"
+                          :rules="[rules.nameRequired, rules.nameSize]"
+                          class="mb-3"
+                        />
+
+                        <v-autocomplete
+                          v-model="newItem.item_type"
+                          :items="types"
+                          label="Item Type"
+                          placeholder="Select a type"
+                          outlined
+                          dense
+                          color="primary"
+                          :rules="[rules.typeRequired]"
+                          class="mb-3"
+                        />
+
+                        <v-combobox
+                          v-if="newItem.item_type === 'list'"
+                          v-model="newItem.selection_list"
+                          label="List options"
+                          multiple
+                          chips
+                          outlined
+                          dense
+                          color="primary"
+                          placeholder="Add options"
+                          class="mb-4"
+                          deletable-chips
+                          clearable
+                        >
+                          <template v-slot:selection="{ attrs, item, select, selected }">
+                            <v-chip
+                              v-bind="attrs"
+                              :input-value="selected"
+                              close
+                              @click="select"
+                              @click:close="removeOption(item)"
+                              small
+                              class="ma-1"
+                            >
+                              {{ item }}
+                            </v-chip>
+                          </template>
+                        </v-combobox>
+                        <v-btn
+                          color="primary"
+                          block
+                          :disabled="!itemFormValid"
+                          @click="createItem"
+                          class="mt-2"
+                        >
+                          <v-icon left small>{{ mdiCheck }}</v-icon>
+                          Add Item
+                        </v-btn>
+                      </v-form>
+
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+              </v-col>
             </v-row>
           </v-form>
         </v-card-text>
 
-        <v-alert v-show="errorMessage" prominent type="error">
-          <v-row align="center">
-            <v-col class="grow">
-              {{ errorMessage }}
-            </v-col>
-          </v-row>
+        <!-- Duplicate name error -->
+        <v-alert 
+          v-if="duplicateError"
+          dismissable 
+          prominent
+          type="error"
+          class="mt-4"
+                      @click:close="duplicateError = false"
+        >
+          A perspective with this name already exists
+        </v-alert>
+
+        <v-alert v-show="localErrorMessage" dismissable type="error"   
+                    @click:close="localErrorMessage = ''">
+          {{ localErrorMessage }}
         </v-alert>
       </v-form>
 
@@ -88,7 +184,7 @@
             <span class="headline">Item Details</span>
             <v-spacer />
             <v-btn icon dark @click="closeItemDetails">
-              <v-icon>mdi-close</v-icon>
+              <v-icon>{{ mdiClose }}</v-icon>
             </v-btn>
           </v-card-title>
           
@@ -143,7 +239,17 @@
 </template>
 
 <script lang="ts">
-import { mdiCreditCardOutline, mdiPlaylistCheck, mdiInformation, mdiClose } from '@mdi/js'
+import { 
+  mdiCreditCardOutline, 
+  mdiPlaylistCheck, 
+  mdiInformation, 
+  mdiClose,
+  mdiPlus,
+  mdiLabel,
+  mdiFormatListBulletedType,
+  mdiPlaylistEdit,
+  mdiCheck
+} from '@mdi/js'
 import type { PropType } from 'vue'
 import Vue from 'vue'
 import BaseCard from '@/components/utils/BaseCard.vue'
@@ -160,34 +266,66 @@ export default Vue.extend({
       type: Object as PropType<Perspective>,
       required: true
     },
-    errorMessage: {
-      type: String,
-      default: ''
-    }
   },
 
   data() {
     return {
       isLoading: false,
       valid: false,
+      itemFormValid: false,
       perspectiveItems: [] as PerspectiveItem[],
       name: '',
+      duplicateError: false,
       mdiPlaylistCheck,
       mdiCreditCardOutline,
       mdiInformation,
       mdiClose,
+      mdiPlus,
+      mdiLabel,
+      mdiFormatListBulletedType,
+      mdiPlaylistEdit,
+      mdiCheck,
       selectedItems: [] as (string | number)[],
       itemDetailDialog: false,
       detailedItem: null as PerspectiveItem | null,
+      newItem: {
+        name: '',
+        item_type: '',
+        selection_list: [] as string[]
+      },
+      types: ['int', 'float', 'bool', 'list'],
       rules: {
         nameRequired: (v: string) => (!!v) || 'Name Required',
         nameSize: (v: string) => (!!(v.length < 101)) || 'Name must be less than 101 characters',
+        typeRequired: (v: string) => (!!v) || 'Type Required',
         itemRequired: (v: (string | number)[]) => (!!v.length) || 'At least one item required'
       },
+      localErrorMessage: '' as string,
+      itemDuplicateError: false, // Add this line
     }
   },
 
   methods: {
+    async validateAndSave() {
+      try {
+        this.duplicateError = false;
+        const perspectives = await this.$repositories.perspective.listPerspective();
+        const nameExists = perspectives.some(p => 
+          p.name.toLowerCase() === this.name.toLowerCase()
+        );
+
+        if (nameExists) {
+          this.duplicateError = true;
+          return;
+        }
+
+        this.$emit('save', { name: this.name, perspectiveItems: this.selectedItems });
+      } catch (error) {
+        console.error('Error validating perspective:', error);
+        this.duplicateError = true;
+      }
+    },
+
     openItemDetails(item: PerspectiveItem, event?: Event) {
       event?.stopPropagation();
       this.detailedItem = item;
@@ -196,15 +334,66 @@ export default Vue.extend({
 
     closeItemDetails() {
       this.itemDetailDialog = false;
-      // Re-focus the autocomplete to keep the menu open
       this.$nextTick(() => {
         const input = (this.$refs.autocomplete as any).$refs.input;
         if (input) {
           input.focus();
         }
       });
+    },
+
+    removeOption(item: string) {
+      this.newItem.selection_list = this.newItem.selection_list.filter(
+        (option) => option !== item
+      );
+    },
+
+async createItem() {
+  try {
+    this.itemDuplicateError = false; // Reset error state
+    this.localErrorMessage = ''; // Clear any previous errors
+
+    // Check for duplicate name in perspectiveItems (local list)
+    const nameExists = this.perspectiveItems.some(item => 
+      item.name.toLowerCase() === this.newItem.name.toLowerCase()
+    );
+
+    if (nameExists) {
+      this.itemDuplicateError = true;
+      this.localErrorMessage = 'An item with this name already exists';
+      return;
     }
-  },
+
+    const itemData = {
+      name: this.newItem.name,
+      item_type: this.newItem.item_type,
+      selection_list: this.newItem.item_type === 'list' ? this.newItem.selection_list : []
+    };
+
+    const newItem = { 
+      id: -1, 
+      ...itemData,
+      createdAt: '', 
+      updatedAt: ''
+    } as PerspectiveItem;
+    
+    const createdItem = await this.$repositories.perspective.createPerspectiveItem(newItem);
+    this.perspectiveItems.push(createdItem);
+    this.selectedItems.push(createdItem.id);
+    
+    this.newItem = {
+      name: '',
+      item_type: '',
+      selection_list: []
+    };
+    (this.$refs.itemForm as any).resetValidation();
+    this.localErrorMessage = '';
+    
+  } catch (error) {
+    console.error('Error creating item:', error);
+    this.localErrorMessage = 'Failed to create item';
+  }
+}  },
 
   async fetch() {
     this.isLoading = true;

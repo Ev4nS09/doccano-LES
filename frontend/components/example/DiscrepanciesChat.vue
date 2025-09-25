@@ -173,7 +173,7 @@ export default Vue.extend({
           this.example.id
         );
         
-        const categories = await this.$repositories.category.list(
+        const categories = await this.$repositories.category.listAll(
           this.projectId.toString(),
           this.example.id
         );

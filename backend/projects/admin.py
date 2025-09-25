@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import (
+    AnnotationRule,
     BoundingBoxProject,
     ImageCaptioningProject,
     ImageClassificationProject,
@@ -11,8 +12,8 @@ from .models import (
     SequenceLabelingProject,
     Tag,
     TextClassificationProject,
-    RuleComment,
-    AnnotationRule,
+    Ticket,
+    TicketComment,
 )
 
 
@@ -43,27 +44,58 @@ class TagAdmin(admin.ModelAdmin):
     )
     search_fields = ("text",)
 
-class RuleCommentInline(admin.TabularInline):
-    model = RuleComment
+
+class TicketCommentInline(admin.TabularInline):
+    model = TicketComment
     extra = 0
+    fields = ('author', 'content', 'created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at')
+
+
+class AnnotationRuleInline(admin.TabularInline):
+    model = Ticket.rules.through
+    extra = 1
+    verbose_name = "Associated Rule"
+    verbose_name_plural = "Associated Rules"
+
 
 class AnnotationRuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'project', 'created_by', 'created_at', 'score', 'start_at', 'end_at')
+    list_display = ('title', 'project', 'created_by', 'created_at', 'score', 'status', 'start_at', 'end_at')
     list_filter = ('project', 'created_by')
     search_fields = ('title', 'description')
-    inlines = [RuleCommentInline]
+    readonly_fields = ('score',)
 
-class PerspectiveAdmin(admin.ModelAdmin):
-    list_display = ('name', 'project', 'p_type', 'created_at', 'updated_at')
-    list_filter = ('project', 'p_type', 'created_at')
-    search_fields = ('name',)
-    ordering = ('-created_at',)
 
-class UserPerspectiveAdmin(admin.ModelAdmin):
-    list_display = ('perspective_name', 'user', 'perspective', 'value', 'created_at', 'updated_at')
-    list_filter = ('perspective', 'user', 'created_at')
-    search_fields = ('user__username', 'perpective__name', 'value')
-    ordering = ('-created_at',)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = ('title', 'project', 'status', 'created_by', 'created_at', 'rule_count')
+    list_filter = ('project', 'status', 'created_by')
+    search_fields = ('title', 'description')
+    inlines = [TicketCommentInline, AnnotationRuleInline]
+    fieldsets = (
+        (None, {
+            'fields': ('project', 'title', 'description', 'status')
+        }),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+
+    def rule_count(self, obj):
+        return obj.rules.count()
+    rule_count.short_description = 'Rules Count'
+
+
+class TicketCommentAdmin(admin.ModelAdmin):
+    list_display = ('ticket', 'author', 'created_at', 'content_preview')
+    list_filter = ('ticket__project', 'author')
+    search_fields = ('content',)
+    readonly_fields = ('created_at', 'updated_at')
+
+    def content_preview(self, obj):
+        return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
+    content_preview.short_description = 'Content'
 
 
 admin.site.register(Member, MemberAdmin)
@@ -76,4 +108,6 @@ admin.site.register(SegmentationProject, ProjectAdmin)
 admin.site.register(ImageCaptioningProject, ProjectAdmin)
 admin.site.register(ImageClassificationProject, ProjectAdmin)
 admin.site.register(Tag, TagAdmin)
-admin.site.register(AnnotationRule,AnnotationRuleAdmin)
+admin.site.register(AnnotationRule, AnnotationRuleAdmin)
+admin.site.register(Ticket, TicketAdmin)
+admin.site.register(TicketComment, TicketCommentAdmin) 

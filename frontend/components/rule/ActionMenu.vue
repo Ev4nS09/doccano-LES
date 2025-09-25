@@ -1,14 +1,15 @@
 <template>
 	<action-menu
 	  :items="items"
-	  text='Actions'
-	  @create="$emit('create')"
+	  text="Actions"
+        @create-rule="$emit('create-rule')"	  
+        @create-ticket="$emit('create-ticket')"
 	/>
   </template>
   
   <script lang="ts">
   import Vue from 'vue'
-  import { mdiPencil } from '@mdi/js'
+  import { mdiPencil, mdiTicket } from '@mdi/js'
   import ActionMenu from '~/components/utils/ActionMenu.vue'
   
   export default Vue.extend({
@@ -16,22 +17,41 @@
 	  ActionMenu
 	},
   
+	props: {
+	  isProjectAdmin: {
+		type: Boolean,
+		default: false
+	  }
+	},
+  
 	data() {
 	  return {
-		mdiPencil
+		mdiPencil,
+		mdiTicket
 	  }
 	},
   
 	computed: {
 	  items() {
-		return [
+		const actions = [
 		  {
-			title: 'Create Rule',
-			icon: mdiPencil,
-			event: 'create'
+			title: 'Create Ticket',
+			icon: this.mdiTicket,
+			event: 'create-ticket'
 		  }
 		]
+  
+		if (this.isProjectAdmin) {
+		  actions.unshift({
+			title: 'Create Rule',
+			icon: this.mdiPencil,
+			event: 'create-rule'
+		  })
+		}
+  
+		return actions
 	  }
 	}
   })
   </script>
+  

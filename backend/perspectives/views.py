@@ -21,6 +21,11 @@ class PerspectiveListCreate(generics.ListCreateAPIView):
     queryset = Perspective.objects.all()
     pagination_class = LargePagination
 
+
+class PerspectiveDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Perspective.objects.all()
+    serializer_class = PerspectiveSerializer
+    lookup_url_kwarg = "perspective_id"
     
 class PerspectiveItemsListCreate(generics.ListAPIView):
     """
@@ -51,7 +56,11 @@ class ValueListCreate(generics.ListCreateAPIView):
         context = super().get_serializer_context()
         return context
 
-class ValueDetail(generics.RetrieveUpdateDestroyAPIView):
+class ValueDetail(generics.ListAPIView):
     serializer_class = ValueSerializer
     permission_classes = [IsAuthenticated & IsProjectMember]
     pagination_class = LargePagination
+
+    def get_queryset(self):
+        member_id = self.kwargs['member_id']
+        return Value.objects.filter(member_id=member_id)
