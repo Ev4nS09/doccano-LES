@@ -7,6 +7,21 @@
         <project-name-field v-model="editedItem.name" outlined autofocus />
         <project-description-field v-model="editedItem.description" outlined />
         <tag-list v-model="editedItem.tags" outlined />
+        <agreement-percentage-field v-model="editedItem.agreementPercentage" class="apf" />
+
+        <v-autocomplete
+          v-model="editedItem.perspective"
+          :items="perspectives"
+          outlined
+          required
+          item-text="name"
+          item-value="id"
+          :label="$t('Perspective')"
+          :placeholder="$t('Select a perspective')"
+          :rules="[rules.perspectiveRequired]"
+          class="mt-8"
+        />
+
         <v-checkbox
           v-if="showExclusiveCategories"
           v-model="editedItem.exclusiveCategories"
@@ -73,7 +88,9 @@ import ProjectNameField from '~/components/project/ProjectNameField.vue'
 import ProjectTypeField from '~/components/project/ProjectTypeField.vue'
 import RandomOrderField from '~/components/project/RandomOrderField.vue'
 import SharingModeField from '~/components/project/SharingModeField.vue'
+import AgreementPercentageField from '~/components/project/AgreementPercentageField.vue'
 import TagList from '~/components/project/TagList.vue'
+import Perspective from '~/components/perspective/perspective.vue'
 import {
   DocumentClassification,
   ImageClassification,
@@ -94,7 +111,9 @@ const initializeProject = () => {
     useRelation: false,
     tags: [] as string[],
     guideline: '',
-    allowMemberToCreateLabelType: false
+    allowMemberToCreateLabelType: false,
+    agreementPercentage: 50.0,
+    perspective: -1,
   }
 }
 
@@ -105,7 +124,8 @@ export default Vue.extend({
     ProjectDescriptionField,
     RandomOrderField,
     SharingModeField,
-    TagList
+    TagList,
+    AgreementPercentageField
   },
 
   layout: 'projects',
@@ -115,8 +135,16 @@ export default Vue.extend({
   data() {
     return {
       valid: false,
-      editedItem: initializeProject()
+      editedItem: initializeProject(),
+      perspectives: [] as Perspective,
+      rules: {
+        perspectiveRequired: (v: Perspective) => (!!v) || 'Perspective Required',
+      },
     }
+  },
+
+  async fetch() {
+    this.perspectives = await this.$repositories.perspective.listPerspective()
   },
 
   computed: {
@@ -142,3 +170,9 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style scoped>
+.apf {
+  margin-top: 35px;
+}
+</style>

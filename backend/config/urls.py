@@ -61,6 +61,8 @@ urlpatterns += [
     path("v1/", include("data_import.urls")),
     path("v1/", include("data_export.urls")),
     path("v1/", include("projects.urls")),
+    path('v1/', include('perspectives.urls')),
+    path('v1/perspectives', include('perspectives.urls')),
     path("v1/projects/<int:project_id>/metrics/", include("metrics.urls")),
     path("v1/projects/<int:project_id>/", include("auto_labeling.urls")),
     path("v1/projects/<int:project_id>/", include("examples.urls")),
@@ -68,6 +70,4 @@ urlpatterns += [
     path("v1/projects/<int:project_id>/", include("label_types.urls")),
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     re_path("", TemplateView.as_view(template_name="index.html")),
-    path("v1/projects/<int:project_id>/", include("perspectives.urls")),
-    path("v1/projects/<int:project_id>/", include("perspective_types.urls")),   
 ]

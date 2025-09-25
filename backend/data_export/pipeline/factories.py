@@ -3,7 +3,7 @@ from typing import Dict, List, Type
 from django.db.models import QuerySet
 
 from . import writers
-from .catalog import CSV, JSON, JSONL, FastText
+from .catalog import CSV, JSON, JSONL, PDF, FastText
 from .comments import Comments
 from .formatters import (
     DictFormatter,
@@ -25,6 +25,7 @@ def create_writer(file_format: str) -> writers.Writer:
         JSON.name: writers.JsonWriter(),
         JSONL.name: writers.JsonlWriter(),
         FastText.name: writers.FastTextWriter(),
+        PDF.name: writers.PdfWriter(),
     }
     if file_format not in mapping:
         ValueError(f"Invalid format: {file_format}")

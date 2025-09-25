@@ -43,7 +43,9 @@ function toModel(item: { [key: string]: any }): Project {
     item.created_at,
     item.updated_at,
     item.author,
-    item.is_text_project
+    item.is_text_project,
+    item.agreement_percentage,
+    item.perspective,
   )
 }
 
@@ -61,8 +63,10 @@ function toPayload(item: Project): { [key: string]: any } {
     grapheme_mode: item.enableGraphemeMode,
     use_relation: item.useRelation,
     tags: item.tags,
+    perspective: item.perspective,
     allow_member_to_create_label_type: item.allowMemberToCreateLabelType,
-    resourcetype: item.resourceType
+    resourcetype: item.resourceType,
+    agreement_percentage: item.agreementPercentage
   }
 }
 
@@ -116,5 +120,22 @@ export class APIProjectRepository {
     const url = `/projects/${project.id}/clone`
     const response = await this.request.post(url)
     return toModel(response.data)
+  }
+
+  async getAgreementPercentage(projectId: number): Promise<number> {
+    const url = `/projects/${projectId}/agreement-percentage`;
+    const response = await this.request.get(url);
+    return response.data.agreement_percentage;
+  }
+
+  async updateAgreementPercentage(projectId: number, percentage: number): Promise<void> {
+    const url = `/projects/${projectId}/agreement-percentage`;
+    await this.request.put(url, { agreement_percentage: percentage });
+  }
+
+  async getPerspective(projectId: number): Promise<number> {
+    const url = `/projects/${projectId}/perspective`;
+    const response = await this.request.get(url);
+    return response.data.perspective_id;
   }
 }

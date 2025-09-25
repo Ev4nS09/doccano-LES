@@ -71,4 +71,13 @@ export class ExampleApplicationService {
     // is not copied correctly.
     return plainToInstance(ExampleItem, item)
   }
+
+  public async bulkUpdateBlockedStatus(projectId: string, 
+    exampleIds: number[], blocked: boolean): Promise<void> {
+    try {
+      await this.repository.bulkUpdateBlockedStatus(projectId, exampleIds, blocked)
+    } catch (e: any) {
+      throw new Error(e.response.data.detail)
+    }
+  }
 }

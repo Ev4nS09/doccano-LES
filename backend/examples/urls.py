@@ -4,11 +4,14 @@ from .views.assignment import (
     AssignmentDetail,
     AssignmentList,
     BulkAssignment,
+    MemberWithLabelsView,
     ResetAssignment,
+    ExampleMembersList,  # Novo endpoint
 )
 from .views.comment import CommentDetail, CommentList
-from .views.example import ExampleDetail, ExampleList
+from .views.example import ExampleBulkBlockView, ExampleDetail, ExampleList
 from .views.example_state import ExampleStateList
+from .views.assignment import ExampleMembersList  # Certifique-se de que a view está importada
 
 urlpatterns = [
     path(route="assignments", view=AssignmentList.as_view(), name="assignment_list"),
@@ -20,4 +23,7 @@ urlpatterns = [
     path(route="comments", view=CommentList.as_view(), name="comment_list"),
     path(route="comments/<int:comment_id>", view=CommentDetail.as_view(), name="comment_detail"),
     path(route="examples/<int:example_id>/states", view=ExampleStateList.as_view(), name="example_state_list"),
+    path(route="examples/<int:example_id>/members", view=ExampleMembersList.as_view(), name="example_members_list"),  # Novo endpoint
+    path(route="examples/<int:example_id>/members-with-labels", view=MemberWithLabelsView.as_view(), name="members_with_labels"),
+	path(route="examples/bulk_block", view=ExampleBulkBlockView.as_view(), name='example_bulk_block')
 ]

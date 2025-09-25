@@ -12,10 +12,12 @@ type ProjectFields = {
   enableSharingMode: boolean
   exclusiveCategories: boolean
   tags: string[]
+  perspective: number
   allowOverlappingSpans: boolean
   enableGraphemeMode: boolean
   useRelation: boolean
   allowMemberToCreateLabelType: boolean
+  agreementPercentage?: number
 }
 
 export interface SearchQueryData {
@@ -53,8 +55,10 @@ export class ProjectApplicationService {
     enableGraphemeMode,
     useRelation,
     tags,
+    perspective,
     guideline = '',
-    allowMemberToCreateLabelType = false
+    allowMemberToCreateLabelType = false,
+    agreementPercentage = 50.0
   }: ProjectFields): Promise<Project> {
     const project = Project.create(
       0,
@@ -69,7 +73,9 @@ export class ProjectApplicationService {
       enableGraphemeMode,
       useRelation,
       tags.map((tag) => TagItem.create(tag)),
-      allowMemberToCreateLabelType
+      perspective,
+      allowMemberToCreateLabelType,
+      agreementPercentage
     )
     try {
       return await this.repository.create(project)
@@ -91,7 +97,9 @@ export class ProjectApplicationService {
       enableGraphemeMode,
       useRelation,
       guideline = '',
-      allowMemberToCreateLabelType
+      perspective,
+      allowMemberToCreateLabelType,
+      agreementPercentage,
     }: Omit<ProjectFields, 'tags'>
   ): Promise<void> {
     const project = Project.create(
@@ -107,7 +115,9 @@ export class ProjectApplicationService {
       enableGraphemeMode,
       useRelation,
       [],
-      allowMemberToCreateLabelType
+      perspective,
+      allowMemberToCreateLabelType,
+      agreementPercentage
     )
 
     try {
@@ -127,6 +137,26 @@ export class ProjectApplicationService {
       return await this.repository.clone(project)
     } catch (e: any) {
       throw new Error(e.response.data.detail)
+    }
+  }
+
+  public async getAgreementPercentage(projectId: number): Promise<number> {
+    try {
+      return await this.repository.getAgreementPercentage(projectId);
+    } catch (e: any) {
+      throw new Error(e.response.data.detail);
+    }
+  }
+
+  public async updateAgreementPercentage(projectId: number, percentage: number): Promise<void> {
+    try {
+      // Validate the percentage before sending
+      if (percentage < 0 || percentage > 100) {
+        throw new Error('Agreement percentage must be between 0 and 100');
+      }
+      await this.repository.updateAgreementPercentage(projectId, percentage);
+    } catch (e: any) {
+      throw new Error(e.response.data.detail);
     }
   }
 }

@@ -18,9 +18,11 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class AssignmentSerializer(serializers.ModelSerializer):
+    assignee_username = serializers.CharField(source="assignee.username", read_only=True)
+
     class Meta:
         model = Assignment
-        fields = ("id", "assignee", "example", "created_at", "updated_at")
+        fields = ("id", "assignee", "example", "created_at", "updated_at", "assignee_username")
         read_only_fields = ("id", "created_at", "updated_at")
 
 
@@ -65,6 +67,7 @@ class ExampleSerializer(serializers.ModelSerializer):
             "upload_name",
             "score",
             "assignments",
+            "blocked",
         ]
         read_only_fields = ["filename", "is_confirmed", "upload_name", "assignments"]
 
@@ -74,3 +77,10 @@ class ExampleStateSerializer(serializers.ModelSerializer):
         model = ExampleState
         fields = ("id", "example", "confirmed_by", "confirmed_at")
         read_only_fields = ("id", "example", "confirmed_by", "confirmed_at")
+
+class MemberWithLabelsSerializer(serializers.Serializer):
+    member_id = serializers.IntegerField()
+    assignee = serializers.IntegerField()
+    assignee_username = serializers.CharField()
+    labels = serializers.ListField(child=serializers.IntegerField())
+    assignment_id = serializers.IntegerField(required=False)  # Optional

@@ -1,7 +1,6 @@
 <template>
   <v-app>
     <the-header>
-            <span> FODA-se </span>
       <template #leftDrawerIcon>
         <v-app-bar-nav-icon @click="drawerLeft = !drawerLeft" />
       </template>

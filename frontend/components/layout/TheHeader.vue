@@ -21,6 +21,25 @@
     <div class="flex-grow-1" />
     <the-color-mode-switcher />
     <locale-menu />
+
+    <v-btn
+      v-if="isAuthenticated && isStaff"
+      text
+      class="text-capitalize"
+      @click="$router.push(localePath('/perspectives'))"
+    >
+    Perspectives 
+    </v-btn>
+
+    <v-btn
+      v-if="isAuthenticated && isStaff"
+      text
+      class="text-capitalize"
+      @click="$router.push(localePath('/users'))"
+    >
+     Users 
+    </v-btn>
+
     <v-btn
       v-if="isAuthenticated"
       text
@@ -28,14 +47,6 @@
       @click="$router.push(localePath('/projects'))"
     >
       {{ $t('header.projects') }}
-    </v-btn>
-    <v-btn
-      v-if="isAuthenticated"
-      text
-      class="text-capitalize"
-      @click="$router.push(localePath('/users'))"
-    >
-     Users 
     </v-btn>
     <v-menu v-if="!isAuthenticated" open-on-hover offset-y>
       <template #activator="{ on }">
@@ -65,11 +76,27 @@
       </template>
       <v-list>
         <v-subheader>{{ getUsername }}</v-subheader>
+
+        <!-- Opção de Settings ou Edit -->
+        <v-list-item @click="settings">
+          <v-list-item-icon>
+            <v-icon>{{ mdiCog }}</v-icon> <!-- Ícone de configurações -->
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>
+              {{ $t('user.settings') }} <!-- Texto para o item de configurações -->
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Opção de trocar o tema RTL -->
         <v-list-item>
           <v-list-item-content>
             <v-switch :input-value="isRTL" :label="direction" class="ms-1" @change="toggleRTL" />
           </v-list-item-content>
         </v-list-item>
+
+        <!-- Opção de Sign Out -->
         <v-list-item @click="signout">
           <v-list-item-icon>
             <v-icon>{{ mdiLogout }}</v-icon>
@@ -82,19 +109,24 @@
         </v-list-item>
       </v-list>
     </v-menu>
+
+    <!-- Adicionando o componente SettingsPanel -->
+    <SettingsPanel ref="settingsPanel" />
   </v-app-bar>
 </template>
 
 <script>
-import { mdiLogout, mdiDotsVertical, mdiMenuDown, mdiHexagonMultiple } from '@mdi/js'
+import { mdiCog, mdiLogout, mdiDotsVertical, mdiMenuDown, mdiHexagonMultiple } from '@mdi/js'
 import { mapGetters, mapActions } from 'vuex'
 import TheColorModeSwitcher from './TheColorModeSwitcher'
 import LocaleMenu from './LocaleMenu'
+import SettingsPanel from './SettingsPanel'
 
 export default {
   components: {
     TheColorModeSwitcher,
-    LocaleMenu
+    LocaleMenu,
+    SettingsPanel
   },
 
   data() {
@@ -114,6 +146,8 @@ export default {
         { title: this.$t('home.demoPolygSegm'), link: 'segmentation' },
         { title: this.$t('home.demoSTT'), link: 'speech-to-text' }
       ],
+      isSettingsPanelVisible: false,
+      mdiCog,
       mdiLogout,
       mdiDotsVertical,
       mdiMenuDown,
@@ -122,7 +156,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters('auth', ['isAuthenticated', 'getUsername']),
+    ...mapGetters('auth', ['isAuthenticated', 'getUsername', 'isStaff']),
     ...mapGetters('projects', ['currentProject']),
     ...mapGetters('config', ['isRTL']),
 
@@ -141,6 +175,10 @@ export default {
     signout() {
       this.logout()
       this.$router.push(this.localePath('/'))
+    },
+    settings() {
+      // Chama o método openPanel do SettingsPanel
+      this.$refs.settingsPanel.openPanel()
     }
   }
 }

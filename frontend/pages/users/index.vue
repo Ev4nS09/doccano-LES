@@ -1,17 +1,6 @@
 <template>
   <v-card>
     <v-card-title v-if="isStaff">
-      <v-btn class="text-capitalize" color="primary" @click.stop="$router.push('projects/create')">
-        {{ $t('generic.create') }}
-      </v-btn>
-      <v-btn
-        class="text-capitalize ms-2"
-        :disabled="!canDelete"
-        outlined
-        @click.stop="dialogDelete = true"
-      >
-        {{ $t('generic.delete') }}
-      </v-btn>
       <v-dialog v-model="dialogDelete">
         <form-delete :selected="selected" @cancel="dialogDelete = false" @remove="remove" />
       </v-dialog>

@@ -1,49 +1,35 @@
 from django.urls import path
 from .views import (
-    CategoryPerspectiveListAPI,
-    CategoryPerspectiveDetailAPI,
-    SpanPerspectiveListAPI,
-    SpanPerspectiveDetailAPI,
-    RelationPerspectiveListAPI,
-    RelationPerspectiveDetailAPI,
+    FilterMembersView,
+    PerspectiveListCreate,
+    PerspectiveItemsListCreate,
+    ItemListCreate
 )
 
-app_name = "perspectives"
-
 urlpatterns = [
-    # Category Perspectives
     path(
-        "examples/<int:example_id>/p-categories",
-        CategoryPerspectiveListAPI.as_view(),
-        name="category_perspective_list"
+        route="perspectives",
+        view=PerspectiveListCreate.as_view(),
+        name="perspective_list"
     ),
     path(
-        "examples/<int:example_id>/p-categories/<int:annotation_id>",
-        CategoryPerspectiveDetailAPI.as_view(),
-        name="category_perspective_detail"
-    ),
-
-    # Span Perspectives
-    path(
-        "examples/<int:example_id>/p-spans",
-        SpanPerspectiveListAPI.as_view(),
-        name="span_perspective_list"
+        route="perspectives/create",
+        view=PerspectiveListCreate.as_view(),
+        name="perspective_create"
     ),
     path(
-        "examples/<int:example_id>/p-spans/<int:annotation_id>",
-        SpanPerspectiveDetailAPI.as_view(),
-        name="span_perspective_detail"
-    ),
-
-    # Relation Perspectives
-    path(
-        "examples/<int:example_id>/p-relations",
-        RelationPerspectiveListAPI.as_view(),
-        name="relation_perspective_list"
+        route="perspectives/items",
+        view=ItemListCreate.as_view(),
+        name="perspective_all_items_list"
     ),
     path(
-        "examples/<int:example_id>/p-relations/<int:annotation_id>",
-        RelationPerspectiveDetailAPI.as_view(),
-        name="relation_perspective_detail"
+        route="perspectives/<int:perspective_id>/items",
+        view=PerspectiveItemsListCreate.as_view(),
+        name="perspective_items_list"
+    ),
+    path(
+        route="projects/<int:project_id>/perspectives/filter-members/",
+        view=FilterMembersView.as_view(),
+        name='filter_members'
     ),
 ]

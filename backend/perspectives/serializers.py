@@ -1,78 +1,65 @@
 from rest_framework import serializers
+
+from projects.models import Project
+from .models import Item, Perspective, Value
 from examples.models import Example
-from perspective_types.models import PerspectiveItem
-from .models import (
-    CategoryPerspective,
-    SpanPerspective,
-    TextPerspective,
-    RelationPerspective,
-    BoundingBoxPerspective,
-    SegmentationPerspective,
-)
-from perspective_types.models import CategoryType, SpanType, RelationType
 
-class PerspectiveItemSerializer(serializers.ModelSerializer):
-    """Serializador para os itens de uma perspetiva."""
+class PerspectiveSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PerspectiveItem
-        fields = ['id', 'name']
+        model = Perspective 
+        fields = [
+            'id',
+            'name',
+            'items',
+            'created_at',
+            'updated_at'
+        ]
 
 
-class CategoryPerspectiveSerializer(serializers.ModelSerializer):
-    """Serializador para as anotações de perspectiva do tipo Categoria."""
-    example = serializers.PrimaryKeyRelatedField(queryset=Example.objects.all())
-    perspective = serializers.PrimaryKeyRelatedField(queryset=CategoryType.objects.all())
-    item = serializers.PrimaryKeyRelatedField(queryset=PerspectiveItem.objects.all())
-
+class ItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CategoryPerspective
-        fields = ['id', 'example', 'user', 'perspective', 'item']
-        read_only_fields = ("user",)
+        model = Item
+        fields = [
+            'id',
+            'name',
+            'selection_list',
+            'item_type',
+            'created_at',
+            'updated_at'
+        ]
 
-class SpanPerspectiveSerializer(serializers.ModelSerializer):
-    """Serializador para as anotações de perspectiva do tipo Span."""
-    example = serializers.PrimaryKeyRelatedField(queryset=Example.objects.all())
-    perspective = serializers.PrimaryKeyRelatedField(queryset=SpanType.objects.all())
+    def validate_item_type(self, value):
+        allowed_types = ["int", "bool", "string", "float", "list"]
+        if value not in allowed_types:
+            raise serializers.ValidationError(f"Invalid item_type. Allowed values are: {allowed_types}")
+        return value
 
-    class Meta:
-        model = SpanPerspective
-        fields = ['id', 'example', 'perspective', 'start_offset', 'end_offset']
-
-
-class TextPerspectiveSerializer(serializers.ModelSerializer):
-    """Serializador para as anotações de perspectiva do tipo Texto."""
-    example = serializers.PrimaryKeyRelatedField(queryset=Example.objects.all())
+class ValueSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    user_name = serializers.CharField(source='member.user.username', read_only=True)
 
     class Meta:
-        model = TextPerspective
-        fields = ['id', 'example', 'text']
+        model = Value
+        fields = ['id', 'member', 'item', 'item_name', 'perspective', 'perspective_name', 'value', 'user_name', 'created_at']
+        extra_kwargs = {
+            'user': {'write_only': True}
+        }
 
+    def validate(self, data):
+        if data['value'].item != data['item']:
+            raise serializers.ValidationError("Selected value doesn't belong to the specified item")
+        return data
 
-class RelationPerspectiveSerializer(serializers.ModelSerializer):
-    """Serializador para as anotações de perspectiva do tipo Relação."""
-    example = serializers.PrimaryKeyRelatedField(queryset=Example.objects.all())
-    type = serializers.PrimaryKeyRelatedField(queryset=RelationType.objects.all())
-
+class MemberFilterSerializer(serializers.Serializer):
+    project_id = serializers.IntegerField(required=True)
+    item_filters = serializers.JSONField(required=False)
+    
+    def validate_item_filters(self, value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("item_filters must be a JSON object")
+        return value
+    
+class ProjectPerspectiveSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RelationPerspective
-        fields = ['id', 'example', 'from_id', 'to_id', 'type']
-
-
-class BoundingBoxPerspectiveSerializer(serializers.ModelSerializer):
-    """Serializador para as anotações de perspectiva do tipo Bounding Box."""
-    example = serializers.PrimaryKeyRelatedField(queryset=Example.objects.all())
-    perspective = serializers.PrimaryKeyRelatedField(queryset=CategoryType.objects.all())
-
-    class Meta:
-        model = BoundingBoxPerspective
-        fields = ['id', 'example', 'perspective', 'x', 'y', 'width', 'height']
-
-
-class SegmentationPerspectiveSerializer(serializers.ModelSerializer):
-    """Serializador para as anotações de perspectiva do tipo Segmentação."""
-    example = serializers.PrimaryKeyRelatedField(queryset=Example.objects.all())
-    perspective = serializers.PrimaryKeyRelatedField(queryset=CategoryType.objects.all())
-
-    class Meta:
-        model = SegmentationPerspective
-        fields = ['id', 'example', 'perspective', 'points']
+        model = Project
+        fields = ['perspective']

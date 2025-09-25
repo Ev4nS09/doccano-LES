@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Manager
+
 from polymorphic.models import PolymorphicModel
 
 from roles.models import Role
@@ -40,6 +41,8 @@ class Project(PolymorphicModel):
     collaborative_annotation = models.BooleanField(default=False)
     single_class_classification = models.BooleanField(default=False)
     allow_member_to_create_label_type = models.BooleanField(default=False)
+    agreement_percentage = models.FloatField(default=50.0)
+    perspective = models.ForeignKey('perspectives.Perspective',on_delete=models.CASCADE, blank=True, null=True)
 
     def add_admin(self):
         admin_role = Role.objects.get(name=settings.ROLE_PROJECT_ADMIN)
@@ -219,3 +222,46 @@ class Member(models.Model):
 
     class Meta:
         unique_together = ("user", "project")
+        
+
+class AnnotationRule(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='annotation_rules')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    upvotes = models.ManyToManyField(User, related_name='upvoted_rules', blank=True)
+    downvotes = models.ManyToManyField(User, related_name='downvoted_rules', blank=True)
+    status = models.CharField(max_length=50, null=True)
+    start_at = models.DateTimeField(null=True, blank=True)
+    end_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def score(self):
+        return self.upvotes.count() - self.downvotes.count()
+
+    def __str__(self):
+        return self.title
+
+class Ticket(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tickets')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    status = models.CharField(max_length=20, choices=[
+        ('open', 'Open'),
+        ('in_progress', 'In Progress'),
+        ('resolved', 'Resolved'),
+        ('closed', 'Closed')
+    ], default='open')
+    rules = models.ManyToManyField('AnnotationRule', related_name='tickets')
+
+class TicketComment(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    content = models.TextField()

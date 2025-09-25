@@ -12,6 +12,7 @@ export class ExampleDTO {
   url: string
   isConfirmed: boolean
   assignments: Assignment[]
+  blocked: boolean
 
   constructor(item: ExampleItem) {
     this.id = item.id
@@ -25,6 +26,7 @@ export class ExampleDTO {
     this.url = item.url
     this.isConfirmed = item.isConfirmed
     this.assignments = item.assignments
+    this.blocked = item.blocked
   }
 }
 

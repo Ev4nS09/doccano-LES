@@ -65,3 +65,76 @@ class CloneProject(views.APIView):
         cloned_project = project.clone()
         serializer = ProjectPolymorphicSerializer(cloned_project)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class ProjectAgreementPercentage(views.APIView):
+    permission_classes = [IsAuthenticated & (IsProjectAdmin | IsProjectStaffAndReadOnly)]
+    
+    def get_queryset(self):
+        """Required for DjangoModelPermissionsOrAnonReadOnly"""
+        return Project.objects.all()
+
+    def get(self, request, project_id):
+        try:
+            project = self.get_queryset().get(pk=project_id)
+            return Response(
+                {'agreement_percentage': project.agreement_percentage}, 
+                status=status.HTTP_200_OK
+            )
+        except Project.DoesNotExist:
+            return Response(
+                {'error': 'Project not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    def put(self, request, project_id):
+        try:
+            project = self.get_queryset().get(pk=project_id)
+            agreement_percentage = request.data.get('agreement_percentage')
+            
+            if agreement_percentage is None:
+                return Response(
+                    {'error': 'agreementPercentage is required'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            try:
+                agreement_percentage = float(agreement_percentage)
+                if agreement_percentage < 0.0 or agreement_percentage > 100.0:
+                    raise ValueError
+            except ValueError:
+                return Response(
+                    {'error': 'agreementPercentage must be a number between 0.0 and 100.0'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            project.agreement_percentage = agreement_percentage
+            project.save()
+            return Response(
+                {'agreement_percentage': project.agreement_percentage}, 
+                status=status.HTTP_200_OK
+            )
+        except Project.DoesNotExist:
+            return Response(
+                {'error': 'Project not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+class ProjectPerspective(views.APIView):
+    permission_classes = [IsAuthenticated & (IsProjectAdmin | IsProjectStaffAndReadOnly)]
+    
+    def get_queryset(self):
+        """Required for DjangoModelPermissionsOrAnonReadOnly"""
+        return Project.objects.all()
+
+    def get(self, request, project_id):
+        try:
+            project = self.get_queryset().get(pk=project_id)
+            return Response(
+                {'perspective_id': project.perspective.id if project.perspective else None},
+                status=status.HTTP_200_OK
+            )
+        except Project.DoesNotExist:
+            return Response(
+                {'error': 'Project not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )

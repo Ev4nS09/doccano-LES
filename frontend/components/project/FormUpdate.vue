@@ -14,6 +14,7 @@
               v-model="project.allowMemberToCreateLabelType"
               label="Allow project members to create label types"
             />
+            <agreement-percentage-field v-model="project.agreementPercentage" />
           </v-col>
         </v-row>
       </v-form>
@@ -44,6 +45,7 @@ import ProjectDescriptionField from './ProjectDescriptionField.vue'
 import ProjectNameField from './ProjectNameField.vue'
 import RandomOrderField from './RandomOrderField.vue'
 import SharingModeField from './SharingModeField.vue'
+import AgreementPercentageField from './AgreementPercentageField.vue'
 import TagList from './TagList.vue'
 import { Project } from '~/domain/models/project/project'
 
@@ -53,7 +55,8 @@ export default Vue.extend({
     ProjectDescriptionField,
     RandomOrderField,
     SharingModeField,
-    TagList
+    TagList,
+    AgreementPercentageField
   },
 
   data() {

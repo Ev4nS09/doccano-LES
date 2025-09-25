@@ -33,6 +33,8 @@ export default {
   },
   passwordRules: {
     passwordRequired: 'Password is required',
-    passwordLessThan30Chars: 'Password must be less than 30 characters'
+    passwordLessThan30Chars: 'Password must be less than 30 characters',
+    passwordMoreThan6Chars: 'Password must be more than 6 characters',
+    passwordMatch: 'Passwords must match'
   }
 }

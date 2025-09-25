@@ -1,15 +1,23 @@
+import io
+import os
 from celery.result import AsyncResult
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .celery_tasks import export_dataset
+from data_export.pipeline.writers import PdfWriter
+
+from .celery_tasks import export_dataset, export_to_pdf
 from .pipeline.catalog import Options
 from projects.models import Project
 from projects.permissions import IsProjectAdmin
+import tempfile  # For temporary file handling
+import logging   # For error logging
+
+logger = logging.getLogger(__name__)
 
 
 class DatasetCatalog(APIView):
@@ -43,3 +51,56 @@ class DatasetExportAPI(APIView):
             project_id=project_id, file_format=file_format, confirmed_only=export_approved, **request.data
         )
         return Response({"task_id": task.task_id})
+
+class PdfExportAPI(APIView):
+    permission_classes = [IsAuthenticated & IsProjectAdmin]
+
+    def post(self, request, project_id):
+        try:
+            # Create temp file
+            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_file:
+                temp_path = temp_file.name
+            
+            # Get the data from request body
+            request_data = request.data
+            print("Received data for PDF generation:", request_data)  # Debug log
+            
+            # Prepare the data structure for PdfWriter
+            pdf_data = {
+                'projectId': str(project_id),
+                'generalStats': request_data.get('generalStats', {}),
+                'perspectiveStats': request_data.get('perspectiveStats', {})
+            }
+            
+            # Write to temp file
+            with open(temp_path, 'wb') as f:
+                success = PdfWriter.write(f, pdf_data)
+                if not success:
+                    raise ValueError("PDF generation failed")
+            
+            # Verify PDF content
+            with open(temp_path, 'rb') as f:
+                content = f.read()
+                if not content.startswith(b'%PDF'):
+                    raise ValueError("Generated file is not a valid PDF")
+            
+            # Return the file
+            response = FileResponse(
+                open(temp_path, 'rb'),
+                content_type='application/pdf',
+                as_attachment=True,
+                filename=f'project_{project_id}_stats.pdf'
+            )
+            
+            # Clean up the temp file after response is sent
+            response['Content-Disposition'] = f'attachment; filename="project_{project_id}_stats.pdf"'
+            return response
+            
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            logger.error(f"PDF export failed for project {project_id}: {str(e)}")
+            return Response(
+                {"error": f"PDF generation failed: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

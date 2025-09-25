@@ -38,6 +38,7 @@ class Category(Label):
 
     class Meta:
         unique_together = ("example", "user", "label")
+        app_label = 'labels'
 
 
 class Span(Label):

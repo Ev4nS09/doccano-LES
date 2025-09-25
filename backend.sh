@@ -2,6 +2,7 @@
 
 source .venv/bin/activate
 cd backend
+python manage.py makemigrations
 python manage.py migrate
 python manage.py create_roles
 python manage.py create_admin --noinput --username "admin" --email "admin@example.com" --password "password"

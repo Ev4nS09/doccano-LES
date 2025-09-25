@@ -27,7 +27,6 @@ import { mapGetters } from 'vuex'
 import TheHeader from '~/components/layout/TheHeader'
 import TheSideBar from '~/components/layout/TheSideBar'
 
-
 export default {
   components: {
     TheSideBar,

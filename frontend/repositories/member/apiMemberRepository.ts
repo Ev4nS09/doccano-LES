@@ -2,7 +2,7 @@ import { MemberItem } from '@/domain/models/member/member'
 import ApiService from '@/services/api.service'
 
 function toModel(item: { [key: string]: any }): MemberItem {
-  return new MemberItem(item.id, item.user, item.role, item.username, item.rolename)
+  return new MemberItem(item.id, item.user, item.email, item.role, item.username, item.rolename)
 }
 
 function toPayload(item: MemberItem): { [key: string]: any } {
@@ -48,5 +48,35 @@ export class APIMemberRepository {
     const url = `/projects/${projectId}/my-role`
     const response = await this.request.get(url)
     return toModel(response.data)
+  }
+
+  async listExampleMembers(projectId: string, exampleId: string): Promise<any[]> {
+    const url = `/projects/${projectId}/examples/${exampleId}/members?limit=1000`;
+    const response = await this.request.get(url);
+    return response.data.results.map((assignment: any) => ({
+      id: assignment.id,
+      assignee: assignment.assignee,
+      example: assignment.example,
+      assignee_username: assignment.assignee_username,
+      created_at: assignment.created_at,
+      updated_at: assignment.updated_at
+    }));
+  }
+
+  async listProjectMembers(projectId: string): Promise<any[]> {
+    const url = `/projects/${projectId}/members`
+    const response = await this.request.get(url)
+    return response.data // Assuming the response contains an array of members with roles
+  }
+
+  async fetchMembersWithLabels(projectId: string, exampleId: string): Promise<any[]> {
+    const url = `/projects/${projectId}/examples/${exampleId}/members-with-labels`
+    try {
+      const response = await this.request.get(url)
+      return response.data
+    } catch (error) {
+      console.error('Failed to fetch members with labels:', error)
+      throw error
+    }
   }
 }

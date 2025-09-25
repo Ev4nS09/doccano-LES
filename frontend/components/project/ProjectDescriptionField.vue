@@ -1,15 +1,12 @@
 <template>
-  <div>
-    <span>NPC</span>
-    <v-text-field
-      v-bind="$attrs"
-      :value="value"
-      :rules="descriptionRules"
-      :label="$t('generic.description')"
-      required
-      @input="$emit('input', $event)"
-    />
-  </div>
+  <v-text-field
+    v-bind="$attrs"
+    :value="value"
+    :rules="descriptionRules"
+    :label="$t('generic.description')"
+    required
+    @input="$emit('input', $event)"
+  />
 </template>
 
 <script lang="ts">

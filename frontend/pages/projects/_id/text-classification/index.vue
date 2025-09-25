@@ -37,6 +37,11 @@
     <template #sidebar>
       <annotation-progress :progress="progress" />
       <list-metadata :metadata="example.meta" class="mt-4" />
+      <member-list-with-stats 
+        :project-id="projectId" 
+        :example-id="example.id"
+        :teacher-list="teacherList"
+        class="mt-4" />
     </template>
   </layout-text>
 </template>
@@ -51,6 +56,7 @@ import LabelSelect from '@/components/tasks/textClassification/LabelSelect'
 import ButtonLabelSwitch from '@/components/tasks/toolbar/buttons/ButtonLabelSwitch'
 import ToolbarLaptop from '@/components/tasks/toolbar/ToolbarLaptop'
 import ToolbarMobile from '@/components/tasks/toolbar/ToolbarMobile'
+import MemberListWithStats from '@/components/tasks/sidebar/MemberListWithStats' // Import the new component
 import { useExampleItem } from '@/composables/useExampleItem'
 import { useLabelList } from '@/composables/useLabelList'
 import { useProjectItem } from '@/composables/useProjectItem'
@@ -65,7 +71,8 @@ export default {
     LayoutText,
     ListMetadata,
     ToolbarLaptop,
-    ToolbarMobile
+    ToolbarMobile,
+    MemberListWithStats // Register the new component
   },
   layout: 'workspace',
 
@@ -128,7 +135,8 @@ export default {
       enableAutoLabeling,
       labelComponent,
       removeTeacher,
-      shortKeys
+      shortKeys,
+      projectId
     }
   }
 }

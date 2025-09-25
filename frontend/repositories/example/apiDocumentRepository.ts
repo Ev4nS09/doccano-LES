@@ -12,7 +12,8 @@ function toModel(item: { [key: string]: any }): ExampleItem {
     item.filename,
     item.is_confirmed,
     item.upload_name,
-    item.assignments
+    item.assignments,
+    item.blocked
   )
 }
 
@@ -22,7 +23,8 @@ function toPayload(item: ExampleItem): { [key: string]: any } {
     text: item.text,
     meta: item.meta,
     annotation_approver: item.annotationApprover,
-    comment_count: item.commentCount
+    comment_count: item.commentCount,
+    blocked: item.blocked
   }
 }
 
@@ -123,5 +125,11 @@ export class APIExampleRepository implements ExampleRepository {
   async confirm(projectId: string, exampleId: number): Promise<void> {
     const url = `/projects/${projectId}/examples/${exampleId}/states`
     await this.request.post(url, {})
+  }
+
+  async bulkUpdateBlockedStatus(projectId: string, 
+    exampleIds: number[], blocked: boolean): Promise<void> {
+    const url = `/projects/${projectId}/examples/bulk_block`
+    await this.request.patch(url, { ids: exampleIds, blocked })
   }
 }

@@ -17,7 +17,7 @@ class MemberList(generics.ListCreateAPIView):
     queryset = Member.objects.all()
     serializer_class = MemberSerializer
     pagination_class = None
-    permission_classes = [IsAuthenticated & IsProjectAdmin]
+    permission_classes = [IsAuthenticated & IsProjectMember] # Tava IsProjectAdmin
 
     def filter_queryset(self, queryset):
         queryset = queryset.filter(project=self.kwargs["project_id"])

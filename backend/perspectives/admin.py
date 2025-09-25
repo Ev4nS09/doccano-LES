@@ -1,42 +1,30 @@
 from django.contrib import admin
-from .models import (
-    CategoryPerspective,
-    SpanPerspective,
-    TextPerspective,
-    RelationPerspective,
-    BoundingBoxPerspective,
-    SegmentationPerspective,
-)
+from .models import Item, Value, Perspective
+#from examples.models import Example
 
-class SpanPerspectiveAdmin(admin.ModelAdmin):
-    list_display = ("example", "perspective", "start_offset", "user")
-    ordering = ("example",)
+class PerspectiveAdmin(admin.ModelAdmin):
+    list_display = ['name', 'created_at', 'updated_at']
+    search_fields = ['name']
+    ordering = ['name']
 
-class CategoryPerspectiveAdmin(admin.ModelAdmin):
-    list_display = ("example", "perspective", "item", "user")
-    ordering = ("example",)
-    list_filter = ("perspective", "item")  # Filtro para as perspectivas e seus itens
+class ItemAdmin(admin.ModelAdmin):
+    list_display = ['name', 'item_type', 'created_at']
+    search_fields = ['name']
+    ordering = ['name']
 
+class ValueAdmin(admin.ModelAdmin):
+    list_display = ['item', 'value', 'member', 'created_at']
+    list_filter = ['member', 'item']
+    search_fields = ['item__name']
+    autocomplete_fields = ['member', 'item']  # Removed item_value from autocomplete
+    ordering = ['-created_at']
 
-class TextPerspectiveAdmin(admin.ModelAdmin):
-    list_display = ("example", "text", "user")
-    ordering = ("example",)
+    def get_value(self, obj):
+        return obj.value
 
-class RelationPerspectiveAdmin(admin.ModelAdmin):
-    list_display = ("example", "type", "user")
-    ordering = ("example",)
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-class BoundingBoxPerspectiveAdmin(admin.ModelAdmin):
-    list_display = ("example", "perspective", "user", "x", "y", "width", "height")
-    ordering = ("example",)
-
-class SegmentationPerspectiveAdmin(admin.ModelAdmin):
-    list_display = ("example", "perspective", "user", "points")
-    ordering = ("example",)
-
-admin.site.register(CategoryPerspective, CategoryPerspectiveAdmin)
-admin.site.register(SpanPerspective, SpanPerspectiveAdmin)
-admin.site.register(TextPerspective, TextPerspectiveAdmin)
-admin.site.register(RelationPerspective, RelationPerspectiveAdmin)
-admin.site.register(BoundingBoxPerspective, BoundingBoxPerspectiveAdmin)
-admin.site.register(SegmentationPerspective, SegmentationPerspectiveAdmin)
+admin.site.register(Perspective, PerspectiveAdmin)
+admin.site.register(Item, ItemAdmin)
+admin.site.register(Value, ValueAdmin)

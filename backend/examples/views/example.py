@@ -15,7 +15,8 @@ class ExampleList(generics.ListCreateAPIView):
     serializer_class = ExampleSerializer
     permission_classes = [IsAuthenticated & (IsProjectAdmin | IsProjectStaffAndReadOnly)]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
-    ordering_fields = ("created_at", "updated_at", "score")
+    ordering_fields = ("id","created_at", "updated_at", "score")
+    ordering = ['id']
     search_fields = ("text", "filename")
     model = Example
     filterset_class = ExampleFilter
@@ -52,3 +53,13 @@ class ExampleDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExampleSerializer
     lookup_url_kwarg = "example_id"
     permission_classes = [IsAuthenticated & (IsProjectAdmin | IsProjectStaffAndReadOnly)]
+
+class ExampleBulkBlockView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated & (IsProjectAdmin | IsProjectStaffAndReadOnly)]
+    
+    def patch(self, request, project_id):
+        example_ids = request.data.get('ids', [])
+        blocked = request.data.get('blocked', False)
+        
+        Example.objects.filter(project_id=project_id, id__in=example_ids).update(blocked=blocked)
+        return Response(status=status.HTTP_200_OK)

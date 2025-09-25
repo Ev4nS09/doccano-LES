@@ -38,7 +38,8 @@ import {
   mdiHome,
   mdiLabel,
   mdiPlayCircleOutline,
-  mdiEye 
+  mdiChartPie,
+  mdiFileChart
 } from '@mdi/js'
 import { getLinkToAnnotationPage } from '~/presenter/linkToAnnotationPage'
 
@@ -87,14 +88,6 @@ export default {
             this.project.canDefineLabel
         },
         {
-          icon: mdiEye,
-          text: 'Perspectives',
-          link: 'perspectives',
-          isVisible:
-            (this.isProjectAdmin || this.project.allowMemberToCreateLabelType) &&
-            this.project.canDefineLabel
-        },
-        {
           icon: mdiLabel,
           text: 'Relations',
           link: 'links',
@@ -118,13 +111,25 @@ export default {
           icon: mdiBookOpenOutline,
           text: this.$t('guideline.guideline'),
           link: 'guideline',
-          isVisible: this.isProjectAdmin
+          isVisible: true
         },
         {
           icon: mdiChartBar,
           text: this.$t('statistics.statistics'),
           link: 'metrics',
           isVisible: this.isProjectAdmin
+        },
+        {
+          icon: mdiChartPie,
+          text: 'Statistics',
+          link: 'statistics',
+          isVisible: this.isProjectAdmin
+        },
+        {
+          icon: mdiFileChart,
+          text: this.$t('Report'),
+          link: 'report',
+          isVisible: true
         },
         {
           icon: mdiCog,

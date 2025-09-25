@@ -1,7 +1,9 @@
 from django.urls import path
 
+from .views.rule_discussion import AnnotationRuleDetail, AnnotationRuleListCreate, RuleStatusUpdate, TicketCommentListCreate, TicketDetail, TicketListCreate, TicketRulesUpdate, VoteOnRule
+
 from .views.member import MemberDetail, MemberList, MyRole
-from .views.project import CloneProject, ProjectDetail, ProjectList
+from .views.project import CloneProject, ProjectAgreementPercentage, ProjectDetail, ProjectList, ProjectPerspective
 from .views.tag import TagDetail, TagList
 
 urlpatterns = [
@@ -13,4 +15,23 @@ urlpatterns = [
     path(route="projects/<int:project_id>/members", view=MemberList.as_view(), name="member_list"),
     path(route="projects/<int:project_id>/clone", view=CloneProject.as_view(), name="clone_project"),
     path(route="projects/<int:project_id>/members/<int:member_id>", view=MemberDetail.as_view(), name="member_detail"),
+	path(route="projects/<int:project_id>/agreement-percentage", view=ProjectAgreementPercentage.as_view(), name="project_agreement_percentage"),
+	path(route="projects/<int:project_id>/rules", view=AnnotationRuleListCreate.as_view(), name="rule_list"),
+    path(route="projects/<int:project_id>/rules/<int:rule_id>", view=AnnotationRuleDetail.as_view(), name="rule_detail"),
+    path(route="projects/<int:project_id>/rules/<int:rule_id>/vote", view=VoteOnRule.as_view(), name="rule_vote"),
+    path(route="projects/<int:project_id>/tickets", view=TicketListCreate.as_view(), name="ticket_list"),
+    path(route="projects/<int:project_id>/tickets/<int:ticket_id>", view=TicketDetail.as_view(), name="ticket_detail"),
+    path(route="projects/<int:project_id>/tickets/<int:ticket_id>/rules", 
+        view=TicketRulesUpdate.as_view(), 
+        name="ticket_rules"),
+    path(route="projects/<int:project_id>/tickets/<int:ticket_id>/comments", 
+        view=TicketCommentListCreate.as_view(), 
+        name="ticket_comments"),
+    path(route="projects/<int:project_id>/perspective", 
+     view=ProjectPerspective.as_view(), 
+     name="project_perspective"),
+    path(route="projects/<int:project_id>/rules/<int:rule_id>/update-status",
+         view=RuleStatusUpdate.as_view(),
+         name='update-status'
+        ),
 ]

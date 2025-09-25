@@ -7,6 +7,8 @@ from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
+from data_export.pipeline.writers import PdfWriter
+
 from .pipeline.dataset import Dataset
 from .pipeline.factories import (
     create_comment,
@@ -69,3 +71,37 @@ def export_dataset(project_id, file_format: str, confirmed_only=False):
     zip_file = shutil.make_archive(dirpath, "zip", dirpath)
     shutil.rmtree(dirpath)
     return zip_file
+
+
+# celery_tasks.py (updated)
+@shared_task(bind=True)
+def export_to_pdf(self, project_id, output_path, confirmed_only=False, user_id=None, stats_data=None):
+    """Async task for PDF generation with statistics"""
+    try:
+        from .pipeline.writers import PdfWriter
+        from projects.models import Project
+        
+        project = Project.objects.get(pk=project_id)
+        
+        # Prepare data - use stats_data if provided, else generate minimal data
+        data = stats_data if stats_data else {
+            'generalStats': {
+                'totalExamples': 0,
+                'annotatedExamples': 0,
+                'participationRate': 0,
+                'fullParticipationRate': 0
+            },
+            'perspectiveStats': {}
+        }
+
+        # Generate PDF
+        with open(output_path, 'wb') as f:
+            success = PdfWriter.write(f, data)
+            if not success:
+                raise ValueError("PDF generation failed")
+            
+        return output_path
+        
+    except Exception as e:
+        logger.error(f"PDF export failed for project {project_id}: {str(e)}")
+        raise

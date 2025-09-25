@@ -32,6 +32,17 @@ class JSON(Format):
 class JSONL(Format):
     name = "JSONL"
 
+class PDF(Format):
+    name = "PDF"
+
+# Update load_example method
+@staticmethod
+def load_example(file):
+    if file.suffix == '.pdf':
+        return "(PDF preview not available)"
+    with open(file, encoding="utf-8") as f:
+        return f.read()
+
 
 class Options:
     options: Dict[str, List] = defaultdict(list)
@@ -95,3 +106,15 @@ Options.register(ProjectType.IMAGE_CAPTIONING, JSONL, IMAGE_CAPTIONING_DIR / "ex
 # Speech to Text
 SPEECH2TEXT_DIR = EXAMPLE_DIR / "speech_to_text"
 Options.register(ProjectType.SPEECH2TEXT, JSONL, SPEECH2TEXT_DIR / "example.jsonl")
+
+
+# Register PDF format for all project types
+Options.register(ProjectType.DOCUMENT_CLASSIFICATION, PDF, TEXT_CLASSIFICATION_DIR / "example.pdf")
+Options.register(ProjectType.SEQUENCE_LABELING, PDF, SEQUENCE_LABELING_DIR / "example.pdf")
+Options.register(ProjectType.SEQ2SEQ, PDF, SEQ2SEQ_DIR / "example.pdf")
+Options.register(ProjectType.INTENT_DETECTION_AND_SLOT_FILLING, PDF, INTENT_DETECTION_DIR / "example.pdf")
+Options.register(ProjectType.IMAGE_CLASSIFICATION, PDF, IMAGE_CLASSIFICATION_DIR / "example.pdf")
+Options.register(ProjectType.BOUNDING_BOX, PDF, BOUNDING_BOX_DIR / "example.pdf")
+Options.register(ProjectType.SEGMENTATION, PDF, SEGMENTATION_DIR / "example.pdf")
+Options.register(ProjectType.IMAGE_CAPTIONING, PDF, IMAGE_CAPTIONING_DIR / "example.pdf")
+Options.register(ProjectType.SPEECH2TEXT, PDF, SPEECH2TEXT_DIR / "example.pdf")

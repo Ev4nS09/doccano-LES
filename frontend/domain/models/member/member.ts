@@ -5,6 +5,7 @@ export class MemberItem {
     readonly id: number,
     readonly user: number,
     readonly role: number,
+    readonly email: string,
     readonly username: string,
     readonly rolename: RoleName
   ) {}

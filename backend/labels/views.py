@@ -87,6 +87,17 @@ class CategoryListAPI(BaseListAPI):
             self.get_queryset().delete()
         return super().create(request, args, kwargs)
 
+class CategoryListAllAPI(BaseListAPI):
+    label_class = Category
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        return self.label_class.objects.filter(example=self.kwargs["example_id"])
+
+    def create(self, request, *args, **kwargs):
+        if self.project.single_class_classification:
+            self.get_queryset().delete()
+        return super().create(request, args, kwargs)
 
 class CategoryDetailAPI(BaseDetailAPI):
     queryset = Category.objects.all()

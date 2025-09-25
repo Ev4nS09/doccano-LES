@@ -22,8 +22,9 @@ export const allProjectTypes = <const>[
   Speech2text
 ]
 export type ProjectType = (typeof allProjectTypes)[number]
-const MAX_PROJECT_NAME_LENGTH = 100
 const MIN_LENGTH = 1
+const MAX_PROJECT_NAME_LENGTH = 100
+
 export const validateMinLength = (text: string): boolean => {
   return text.trim().length >= MIN_LENGTH
 }
@@ -50,6 +51,10 @@ export const canDefineLabel = (projectType: ProjectType): boolean => {
   return canDefineCategory(projectType) || canDefineSpan(projectType)
 }
 
+export const validateAgreementPercentage = (value: number): boolean => {
+  return value >= 0.0 && value <= 100.0
+}
+
 export class Project {
   name: string
   description: string
@@ -67,12 +72,14 @@ export class Project {
     readonly enableGraphemeMode: boolean,
     readonly useRelation: boolean,
     readonly tags: TagItem[],
+    readonly perspective: number,
     readonly allowMemberToCreateLabelType: boolean = false,
     readonly users: number[] = [],
     readonly createdAt: string = '',
     readonly updatedAt: string = '',
     readonly author: string = '',
-    readonly isTextProject: boolean = false
+    readonly isTextProject: boolean = false,
+    readonly agreementPercentage: number = 50.0
   ) {
     if (!validateMinLength(_name)) {
       throw new Error('Project name is required')
@@ -81,10 +88,13 @@ export class Project {
       throw new Error('Project name must be less than 100 characters')
     }
     if (!validateMinLength(_description)) {
-      throw new Error('There must be a description')
+      throw new Error('Project description is required')
     }
     if (!allProjectTypes.includes(_projectType as ProjectType)) {
       throw new Error(`Invalid project type: ${_projectType}`)
+    }
+    if (!validateAgreementPercentage(agreementPercentage)) {
+      throw new Error('Agreement percentage must be between 0.0 and 100.0')
     }
     this.name = _name.trim()
     this.description = _description.trim()
@@ -104,7 +114,14 @@ export class Project {
     enableGraphemeMode: boolean,
     useRelation: boolean,
     tags: TagItem[],
-    allowMemberToCreateLabelType: boolean
+    perspective: number,
+    allowMemberToCreateLabelType: boolean,
+    agreementPercentage: number = 50.0,
+    users: number[] = [],
+    createdAt: string = '',
+    updatedAt: string = '',
+    author: string = '',
+    isTextProject: boolean = false
   ) {
     return new Project(
       id,
@@ -119,7 +136,14 @@ export class Project {
       enableGraphemeMode,
       useRelation,
       tags,
-      allowMemberToCreateLabelType
+      perspective,
+      allowMemberToCreateLabelType,
+      users,
+      createdAt,
+      updatedAt,
+      author,
+      isTextProject,
+      agreementPercentage
     )
   }
 
